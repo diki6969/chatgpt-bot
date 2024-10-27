@@ -93,7 +93,7 @@ class Api_feature {
         const method = data ? "POST" : "GET";
 
         const config = {
-            baseURL: this.Itspire,
+            baseURL: this.itzpire,
             url: endpoint,
             method: method,
             headers: {
