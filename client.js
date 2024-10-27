@@ -10,6 +10,9 @@ const Pino = require("pino"),
     fs = require("fs"),
     path = require("path"),
     colors = require("@colors/colors/safe");
+
+const { connectDB, getOrCreateChat, updateChat } = require('./database');
+    
 class Api_feature {
     constructor() {
         this.Nazuna = "https://api.nazuna.my.id/api/";
@@ -143,6 +146,8 @@ function loadPlugins() {
 
 loadPlugins();
 const connect = async () => {
+  // Panggil connectDB di awal aplikasi
+await connectDB();
     console.log(colors.green("Connecting..."));
     const { state, saveCreds } = await useMultiFileAuthState("session");
     const config = JSON.parse(fs.readFileSync("./pairing.json", "utf-8"));
@@ -248,85 +253,33 @@ const connect = async () => {
         }
         if (pesan && !m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
             kyy.readMessages([m.key]);
-            kyy.ai = kyy.ai ? kyy.ai : {};
-            const data = kyy.ai[m.key.remoteJid]
-                ? kyy.ai[m.key.remoteJid].data.push({
-                      role: "user",
-                      content: pesan
-                  })
-                : [
-                      {
-                          role: "system",
-                          content: `lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa.`
-                      },
-                      {
-                          role: "system",
-                          content: `semua respons harus mengikuti format JSON ini:
-
-{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini>" }`
-                      },
-                      {
-                          role: "system",
-                          content: `kalo gw minta lagu, ubah 'type' jadi 'play'. kalo judul lagunya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'play' sebelum judul lagunya bener-bener jelas. kalo jelas, isi 'input' dengan judul lagunya dan 'output' diisi dengan respons lagi nunggu lagu terkirim.`
-                      },
-                      {
-                          role: "system",
-                          content: `kalo gw minta gambar, ubah 'type' jadi 'search_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'search_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo pencarian gambar sedang berlangsung.`
-                      },
-                      {
-                          role: "system",
-                          content: `kalo gw minta untuk buat gambar, ubah 'type' jadi 'create_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'create_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo gambar lagi dibuat.`
-                      },
-                      {
-                          role: "system",
-                          content: `untuk semua pertanyaan lainnya, pertahankan 'type' sebagai 'text', isi 'input' dengan pertanyaan pengguna, dan berikan respons seperti biasa.`
-                      },
-                      {
-                          role: "user",
-                          content: pesan
-                      }
-                  ];
+            // Dapatkan atau buat chat baru
+            const chat = await getOrCreateChat(m.key.remoteJid);
+            
+            // Tambah pesan user
+            await updateChat(chat, {
+                role: "user",
+                content: pesan
+            });
             await kyy.sendPresenceUpdate("composing", m.key.remoteJid);
             const response = await chatWithGPT(
-                kyy.ai[m.key.remoteJid] ? kyy.ai[m.key.remoteJid].data : data
+                chat.conversations
             );
             let out;
             if (response === "undefined") {
-                return (
-                    kyy.ai[m.key.remoteJid]
-                        ? kyy.ai[m.key.remoteJid].data
-                        : data
-                ).pop();
+                return;
             } else if (typeof response === "undefined") {
-                return (
-                    kyy.ai[m.key.remoteJid]
-                        ? kyy.ai[m.key.remoteJid].data
-                        : data
-                ).pop();
+                return;
             } else if (response === undefined) {
-                return (
-                    kyy.ai[m.key.remoteJid]
-                        ? kyy.ai[m.key.remoteJid].data
-                        : data
-                ).pop();
+                return;
             } else {
                 out = JSON.parse(response);
             }
             kyy.reply(m.key.remoteJid, out.output, m).then(async a => {
-                kyy.ai[m.key.remoteJid]
-                    ? null
-                    : await data.push({
-                          role: "assistant",
-                          content: response
-                      });
-                kyy.ai[m.key.remoteJid]
-                    ? kyy.ai[m.key.remoteJid].data.push({
-                          role: "assistant",
-                          content: response
-                      })
-                    : (kyy.ai[m.key.remoteJid] = {
-                          data: data
-                      });
+                await updateChat(chat, {
+                        role: "assistant",
+                        content: response
+                    });
                 /*switch (out.type) {
                     case "play":
                         wait(m.key.remoteJid, a.key);
