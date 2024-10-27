@@ -37,7 +37,7 @@ const chatSchema = new mongoose.Schema(
     }
 );
 
-chatSchema.pre("save", function (next) {
+/*chatSchema.pre("save", function (next) {
     if (this.conversations.length > 80) {
         const systemMessages = this.conversations.filter(
             msg => msg.role === "system"
@@ -45,7 +45,7 @@ chatSchema.pre("save", function (next) {
         this.conversations = [...systemMessages];
     }
     next();
-});
+});*/
 
 const Chat = mongoose.model("Chat", chatSchema);
 
