@@ -27,7 +27,7 @@ module.exports = async (m, out, kyy, a) => {
         kyy.reply(m.key.remoteJid, convert_msg).then(async y => {
             await updateChat(chat, {
                 role: "assistant",
-                content: convert_msg
+                content: `{"type": "text", "input": "${out.input}", "output": "${convert_msg}"}`
             });
         });
     }
