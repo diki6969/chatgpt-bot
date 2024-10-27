@@ -11,8 +11,8 @@ const Pino = require("pino"),
     path = require("path"),
     colors = require("@colors/colors/safe");
 
-const { connectDB, getOrCreateChat, updateChat } = require('./database');
-    
+const { connectDB, getOrCreateChat, updateChat } = require("./database");
+
 class Api_feature {
     constructor() {
         this.Nazuna = "https://api.nazuna.my.id/api/";
@@ -129,15 +129,13 @@ async function chatWithGPT(data_msg) {
     }
 }
 
-// Objek untuk menyimpan semua fungsi plugin
 const plugins = {};
 
-// Fungsi untuk memuat semua plugin
 function loadPlugins() {
     const pluginDir = path.join(__dirname, "plugins");
     fs.readdirSync(pluginDir).forEach(file => {
         if (file.endsWith(".js")) {
-            const pluginName = path.basename(file, ".js"); // Mengambil nama file tanpa ekstensi
+            const pluginName = path.basename(file, ".js");
             plugins[pluginName] = require(path.join(pluginDir, file));
             console.log(`Plugin ${pluginName} telah dimuat.`);
         }
@@ -146,8 +144,7 @@ function loadPlugins() {
 
 loadPlugins();
 const connect = async () => {
-  // Panggil connectDB di awal aplikasi
-await connectDB();
+    await connectDB();
     console.log(colors.green("Connecting..."));
     const { state, saveCreds } = await useMultiFileAuthState("session");
     const config = JSON.parse(fs.readFileSync("./pairing.json", "utf-8"));
@@ -253,18 +250,13 @@ await connectDB();
         }
         if (pesan && !m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
             kyy.readMessages([m.key]);
-            // Dapatkan atau buat chat baru
             const chat = await getOrCreateChat(m.key.remoteJid);
-            
-            // Tambah pesan user
             await updateChat(chat, {
                 role: "user",
                 content: pesan
             });
-            await kyy.sendPresenceUpdate("composing", m.key.remoteJid);
-            const response = await chatWithGPT(
-                chat.conversations
-            );
+            kyy.sendPresenceUpdate("composing", m.key.remoteJid);
+            const response = await chatWithGPT(chat.conversations);
             let out;
             if (response === "undefined") {
                 return;
@@ -277,63 +269,9 @@ await connectDB();
             }
             kyy.reply(m.key.remoteJid, out.output, m).then(async a => {
                 await updateChat(chat, {
-                        role: "assistant",
-                        content: response
-                    });
-                /*switch (out.type) {
-                    case "play":
-                        wait(m.key.remoteJid, a.key);
-                        let search = await yts(out.input);
-                        let f = search.all.filter(v => !v.url.includes("@"));
-                        let res = await Api.widipe("download/ytdl", {
-                            url: f[0].url
-                        });
-                        if (!res.status) return;
-                        let anu = res.result;
-                        await sendAudio(
-                            m.key.remoteJid,
-                            {
-                                audio: { url: anu.mp3 },
-                                mimetype: "audio/mpeg",
-                                fileName: `${anu.title}.mp3`
-                            },
-                            a,
-                            anu.title,
-                            anu.thumbnail,
-                            f[0].url
-                        );
-                        break;
-                    case "search_img":
-                        wait(m.key.remoteJid, a.key);
-                        let img = await Api.widipe("googleimage", {
-                            query: out.input
-                        });
-                        kyy.sendMessage(
-                            m.key.remoteJid,
-                            {
-                                image: { url: img.result[0] }
-                            },
-                            { quoted: a }
-                        );
-                        break;
-                    case "create_img":
-                        wait(m.key.remoteJid, a.key);
-                        let ai_img = (
-                            await axios.get(
-                                "https://widipe.com/v1/text2img?text=" +
-                                    encodeURIComponent(out.input),
-                                { responseType: "arraybuffer" }
-                            )
-                        ).data;
-                        kyy.sendMessage(
-                            m.key.remoteJid,
-                            {
-                                image: ai_img
-                            },
-                            { quoted: a }
-                        );
-                        break;
-                }*/
+                    role: "assistant",
+                    content: response
+                });
                 if (plugins[out.type]) {
                     await plugins[out.type](m, out, kyy, a);
                 }
