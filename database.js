@@ -37,15 +37,18 @@ const chatSchema = new mongoose.Schema(
     }
 );
 
-/*chatSchema.pre("save", function (next) {
-    if (this.conversations.length > 80) {
+chatSchema.pre("save", function (next) {
+    if (this.conversations.filter(msg => msg.role !== "system").length > 80) {
         const systemMessages = this.conversations.filter(
             msg => msg.role === "system"
         );
-        this.conversations = [...systemMessages];
+        const recentMessages = this.conversations
+            .filter(msg => msg.role !== "system")
+            .slice(-40);
+        this.conversations = [...systemMessages, ...recentMessages];
     }
     next();
-});*/
+});
 
 const Chat = mongoose.model("Chat", chatSchema);
 
