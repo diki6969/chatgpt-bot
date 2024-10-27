@@ -1,4 +1,5 @@
 module.exports = async (m, out, kyy, a) => {
+    let chat = await getOrCreateChat(m.key.remoteJid);
     kyy.wait(m.key.remoteJid, a.key);
     let search = await Api.itzpire("ai/bing-ai", {
         model: "Creative",
@@ -20,8 +21,19 @@ module.exports = async (m, out, kyy, a) => {
                 ]
             }
         });
-        if (!fail.status) return kyy.reply(m.key.remoteJid, "gagal");
-        kyy.reply(m.key.remoteJid, fail.result);
+        if (!fail.status)
+            return kyy.reply(m.key.remoteJid, "gagal").then(async y => {
+                await updateChat(chat, {
+                    role: "assistant",
+                    content: `{"type": "text", "input": "${out.input}", "output": "gagal"}`
+                });
+            });
+        kyy.reply(m.key.remoteJid, fail.result).then(async jb => {
+            await updateChat(chat, {
+                role: "assistant",
+                content: `{"type": "text", "input": "${out.input}", "output": "${fail.result}"}`
+            });
+        });
     } else {
         let convert_msg = await convert(search.result);
         kyy.reply(m.key.remoteJid, convert_msg).then(async y => {
