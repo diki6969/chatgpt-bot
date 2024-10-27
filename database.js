@@ -38,12 +38,11 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.pre("save", function (next) {
-    if (this.conversations.length > 50) {
+    if (this.conversations.length > 80) {
         const systemMessages = this.conversations.filter(
             msg => msg.role === "system"
         );
-        const recentMessages = this.conversations.slice(-45);
-        this.conversations = [...systemMessages, ...recentMessages];
+        this.conversations = [...systemMessages];
     }
     next();
 });
@@ -76,6 +75,55 @@ mongoose.connection.on("error", err => {
     console.error("MongoDB connection error:", err);
 });
 
+const defaultSystemMessages = [
+    {
+        role: "system",
+        content: `lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa.`
+    },
+    {
+        role: "system",
+        content: `semua respons harus mengikuti format JSON ini:
+
+{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini>" }`
+    },
+    {
+        role: "system",
+        content: `kalo gw minta lagu, ubah 'type' jadi 'play'. kalo judul lagunya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'play' sebelum judul lagunya bener-bener jelas. kalo jelas, isi 'input' dengan judul lagunya dan 'output' diisi dengan respons lagi nunggu lagu terkirim.`
+    },
+    {
+        role: "system",
+        content: `kalo gw minta gambar, ubah 'type' jadi 'search_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'search_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo pencarian gambar sedang berlangsung.`
+    },
+    {
+        role: "system",
+        content: `kalo gw minta untuk buat gambar, ubah 'type' jadi 'create_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'create_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo gambar lagi dibuat.`
+    },
+    {
+        role: "system",
+        content: `untuk semua pertanyaan lainnya, pertahankan 'type' sebagai 'text', isi 'input' dengan pertanyaan pengguna, dan berikan respons seperti biasa.`
+    }
+];
+
+async function updateAllChatsSystemMessages() {
+    try {
+        const chats = await Chat.find({});
+
+        for (const chat of chats) {
+            chat.conversations = chat.conversations.filter(
+                msg => msg.role !== "system"
+            );
+
+            chat.conversations.unshift(...defaultSystemMessages);
+
+            await chat.save();
+        }
+
+        console.log("Successfully updated all chats with new system messages");
+    } catch (error) {
+        console.error("Error updating system messages:", error);
+    }
+}
+
 async function getOrCreateChat(userId) {
     try {
         let chat = await Chat.findOne({ userId });
@@ -83,35 +131,23 @@ async function getOrCreateChat(userId) {
         if (!chat) {
             chat = new Chat({
                 userId,
-                conversations: [
-                    {
-                        role: "system",
-                        content: `lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa.`
-                    },
-                    {
-                        role: "system",
-                        content: `semua respons harus mengikuti format JSON ini:
-
-{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini>" }`
-                    },
-                    {
-                        role: "system",
-                        content: `kalo gw minta lagu, ubah 'type' jadi 'play'. kalo judul lagunya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'play' sebelum judul lagunya bener-bener jelas. kalo jelas, isi 'input' dengan judul lagunya dan 'output' diisi dengan respons lagi nunggu lagu terkirim.`
-                    },
-                    {
-                        role: "system",
-                        content: `kalo gw minta gambar, ubah 'type' jadi 'search_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'search_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo pencarian gambar sedang berlangsung.`
-                    },
-                    {
-                        role: "system",
-                        content: `kalo gw minta untuk buat gambar, ubah 'type' jadi 'create_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'create_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo gambar lagi dibuat.`
-                    },
-                    {
-                        role: "system",
-                        content: `untuk semua pertanyaan lainnya, pertahankan 'type' sebagai 'text', isi 'input' dengan pertanyaan pengguna, dan berikan respons seperti biasa.`
-                    }
-                ]
+                conversations: [...defaultSystemMessages]
             });
+            await chat.save();
+        } else {
+            const currentSystemMessages = chat.conversations.filter(
+                msg => msg.role === "system"
+            );
+            if (
+                JSON.stringify(currentSystemMessages) !==
+                JSON.stringify(defaultSystemMessages)
+            ) {
+                chat.conversations = [
+                    ...defaultSystemMessages,
+                    ...chat.conversations.filter(msg => msg.role !== "system")
+                ];
+                await chat.save();
+            }
         }
 
         return chat;
@@ -154,5 +190,6 @@ module.exports = {
     connectDB,
     Chat,
     getOrCreateChat,
-    updateChat
+    updateChat,
+    updateAllChatsSystemMessages
 };
