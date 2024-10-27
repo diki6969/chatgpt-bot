@@ -1,87 +1,85 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-// Hilangkan warning
-mongoose.set('strictQuery', false);
+mongoose.set("strictQuery", false);
 
-// Schema
-const chatSchema = new mongoose.Schema({
-    userId: {
-        type: String,
-        required: true,
-        index: true // Untuk optimasi query
-    },
-    conversations: [{
-        role: {
+const chatSchema = new mongoose.Schema(
+    {
+        userId: {
             type: String,
             required: true,
-            enum: ['system', 'user', 'assistant'] // Validasi role
+            index: true
         },
-        content: {
-            type: String,
-            required: true
-        },
-        timestamp: {
+        conversations: [
+            {
+                role: {
+                    type: String,
+                    required: true,
+                    enum: ["system", "user", "assistant"]
+                },
+                content: {
+                    type: String,
+                    required: true
+                },
+                timestamp: {
+                    type: Date,
+                    default: Date.now
+                }
+            }
+        ],
+        lastUpdate: {
             type: Date,
-            default: Date.now
+            default: Date.now,
+            index: true
         }
-    }],
-    lastUpdate: {
-        type: Date,
-        default: Date.now,
-        index: true // Untuk optimasi query
+    },
+    {
+        timestamps: true
     }
-}, {
-    timestamps: true // Menambahkan createdAt dan updatedAt
-});
+);
 
-// Middleware untuk membatasi jumlah pesan
-chatSchema.pre('save', function(next) {
+chatSchema.pre("save", function (next) {
     if (this.conversations.length > 50) {
-        const systemMessages = this.conversations.filter(msg => msg.role === 'system');
+        const systemMessages = this.conversations.filter(
+            msg => msg.role === "system"
+        );
         const recentMessages = this.conversations.slice(-45);
         this.conversations = [...systemMessages, ...recentMessages];
     }
     next();
 });
 
-const Chat = mongoose.model('Chat', chatSchema);
+const Chat = mongoose.model("Chat", chatSchema);
 
-// Koneksi Database
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect('mongodb+srv://ikyyofc:KucingLari16@aikyy.v5arl.mongodb.net/?retryWrites=true&w=majority&appName=aikyy', {
+        const conn = await mongoose.connect(process.env.mongodb, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
-        
+
         console.log(`MongoDB Connected: ${conn.connection.host}`);
-        
-        // Buat index
+
         await Chat.collection.createIndex({ userId: 1 });
         await Chat.collection.createIndex({ lastUpdate: 1 });
-        
     } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
+        console.error("Error connecting to MongoDB:", error);
         process.exit(1);
     }
 };
 
-// Handle disconnect
-mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected! Attempting to reconnect...');
+mongoose.connection.on("disconnected", () => {
+    console.log("MongoDB disconnected! Attempting to reconnect...");
     setTimeout(connectDB, 5000);
 });
 
-// Handle errors
-mongoose.connection.on('error', (err) => {
-    console.error('MongoDB connection error:', err);
+mongoose.connection.on("error", err => {
+    console.error("MongoDB connection error:", err);
 });
 
-// Function untuk mendapatkan atau membuat chat
 async function getOrCreateChat(userId) {
     try {
         let chat = await Chat.findOne({ userId });
-        
+
         if (!chat) {
             chat = new Chat({
                 userId,
@@ -92,21 +90,37 @@ async function getOrCreateChat(userId) {
                     },
                     {
                         role: "system",
-                        content: `semua respons harus mengikuti format JSON ini:\n\n{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini>" }`
+                        content: `semua respons harus mengikuti format JSON ini:
+
+{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini>" }`
+                    },
+                    {
+                        role: "system",
+                        content: `kalo gw minta lagu, ubah 'type' jadi 'play'. kalo judul lagunya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'play' sebelum judul lagunya bener-bener jelas. kalo jelas, isi 'input' dengan judul lagunya dan 'output' diisi dengan respons lagi nunggu lagu terkirim.`
+                    },
+                    {
+                        role: "system",
+                        content: `kalo gw minta gambar, ubah 'type' jadi 'search_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'search_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo pencarian gambar sedang berlangsung.`
+                    },
+                    {
+                        role: "system",
+                        content: `kalo gw minta untuk buat gambar, ubah 'type' jadi 'create_img'. kalo deskripsi gambarnya gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'create_img' sebelum deskripsi gambarnya bener-bener jelas. kalo jelas, isi 'input' dengan deskripsi gambar dan 'output' diisi dengan pesan kalo gambar lagi dibuat.`
+                    },
+                    {
+                        role: "system",
+                        content: `untuk semua pertanyaan lainnya, pertahankan 'type' sebagai 'text', isi 'input' dengan pertanyaan pengguna, dan berikan respons seperti biasa.`
                     }
-                    // Tambahkan system messages lainnya sesuai kebutuhan
                 ]
             });
         }
-        
+
         return chat;
     } catch (error) {
-        console.error('Error in getOrCreateChat:', error);
+        console.error("Error in getOrCreateChat:", error);
         throw error;
     }
 }
 
-// Function untuk update chat
 async function updateChat(chat, newMessage) {
     try {
         chat.conversations.push(newMessage);
@@ -114,21 +128,27 @@ async function updateChat(chat, newMessage) {
         await chat.save();
         return chat;
     } catch (error) {
-        console.error('Error in updateChat:', error);
+        console.error("Error in updateChat:", error);
         throw error;
     }
 }
 
-// Cleanup routine
-setInterval(async () => {
-    try {
-        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-        const result = await Chat.deleteMany({ lastUpdate: { $lt: thirtyDaysAgo } });
-        console.log(`Cleaned ${result.deletedCount} old chat records`);
-    } catch (error) {
-        console.error('Error in cleanup routine:', error);
-    }
-}, 24 * 60 * 60 * 1000);
+setInterval(
+    async () => {
+        try {
+            const thirtyDaysAgo = new Date(
+                Date.now() - 30 * 24 * 60 * 60 * 1000
+            );
+            const result = await Chat.deleteMany({
+                lastUpdate: { $lt: thirtyDaysAgo }
+            });
+            console.log(`Cleaned ${result.deletedCount} old chat records`);
+        } catch (error) {
+            console.error("Error in cleanup routine:", error);
+        }
+    },
+    24 * 60 * 60 * 1000
+);
 
 module.exports = {
     connectDB,
