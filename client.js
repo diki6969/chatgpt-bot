@@ -11,7 +11,12 @@ const Pino = require("pino"),
     path = require("path"),
     colors = require("@colors/colors/safe");
 
-const { connectDB, getOrCreateChat, updateChat } = require("./database");
+const {
+    connectDB,
+    getOrCreateChat,
+    updateChat,
+    updateAllChatsSystemMessages
+} = require("./database");
 
 class Api_feature {
     constructor() {
@@ -145,6 +150,7 @@ function loadPlugins() {
 loadPlugins();
 const connect = async () => {
     await connectDB();
+    await updateAllChatsSystemMessages();
     console.log(colors.green("Connecting..."));
     const { state, saveCreds } = await useMultiFileAuthState("session");
     const config = JSON.parse(fs.readFileSync("./pairing.json", "utf-8"));
