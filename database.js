@@ -103,7 +103,7 @@ const defaultSystemMessages = [
     },
     {
         role: "system",
-        content: `kalo gw minta informasi waktu nyata, informasi terbaru, atau suatu hal yang lu gabisa bantu, ubah 'type' jadi 'searching'. kalo informasi yang ditanyain gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'searching' sebelum informasi yang ditanyain bener-bener jelas. kalo jelas, isi 'input' dengan informasi yang ditanyain dan 'output' diisi dengan pesan kalo lu lagi nyari diinternet.`
+        content: `kalo gw minta informasi waktu nyata, informasi terbaru, atau apapun yang membutuhkan info up to date, ubah 'type' jadi 'searching'. kalo informasi yang ditanyain gak jelas, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'searching' sebelum informasi yang ditanyain bener-bener jelas. kalo jelas, isi 'input' dengan informasi yang ditanyain dan 'output' diisi dengan pesan kalo lu lagi nyari diinternet.`
     },
     {
         role: "system",
