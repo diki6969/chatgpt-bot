@@ -272,15 +272,17 @@ const connect = async () => {
             } else {
                 out = JSON.parse(response);
             }
-            kyy.reply(m.key.remoteJid, out.output, m).then(async a => {
-                await updateChat(chat, {
-                    role: "assistant",
-                    content: response
-                });
-                if (plugins[out.type]) {
-                    await plugins[out.type](m, out, kyy, a);
+            kyy.reply(m.key.remoteJid, jsonFormat(out.output), m).then(
+                async a => {
+                    await updateChat(chat, {
+                        role: "assistant",
+                        content: response
+                    });
+                    if (plugins[out.type]) {
+                        await plugins[out.type](m, out, kyy, a);
+                    }
                 }
-            });
+            );
         }
     });
 };
