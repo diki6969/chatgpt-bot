@@ -17,7 +17,7 @@ const {
     updateChat,
     updateAllChatsSystemMessages
 } = require("./database");
-
+global.updateChat = updateChat;
 class Api_feature {
     constructor() {
         this.Nazuna = "https://api.nazuna.my.id/api/";
