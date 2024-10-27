@@ -22,7 +22,7 @@ class Api_feature {
     constructor() {
         this.Nazuna = "https://api.nazuna.my.id/api/";
         this.Widipe = "https://widipe.com/";
-        this.Itspire = "https://itzpire.com/";
+        this.Itzpire = "https://itzpire.com/";
         //this.apiKey = process.env.API_KEYS;
     }
 
