@@ -213,8 +213,7 @@ const connect = async () => {
                     ?.text ??
                 m.message?.conversation
             )?.toLowerCase() || "";
-        kyy.reply = (jid, text) =>
-            kyy.sendMessage(jid, { text: text }, { quoted: m });
+        kyy.reply = (jid, text) => kyy.sendMessage(jid, { text: text });
         kyy.wait = (jid, keys) => {
             kyy.sendMessage(jid, { react: { text: "⌛", key: keys } });
         };
