@@ -17,6 +17,7 @@ const {
     updateChat,
     updateAllChatsSystemMessages
 } = require("./database");
+global.getOrCreateChat = getOrCreateChat;
 global.updateChat = updateChat;
 class Api_feature {
     constructor() {
