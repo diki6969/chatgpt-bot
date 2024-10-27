@@ -88,7 +88,7 @@ class Api_feature {
                 });
         });
     };
-    itspire = (endpoint, options = {}) => {
+    itzpire = (endpoint, options = {}) => {
         const { data, ...params } = options;
         const method = data ? "POST" : "GET";
 
