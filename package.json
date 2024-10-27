@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "pm2": "pm2 start index.js && pm2 save && pm2 logs"
+    "pm2": "npx pm2 start index.js && npx pm2 save && npx pm2 logs"
   },
   "keywords": [
     "wabot",
@@ -24,6 +24,7 @@
     "fs": "^0.0.1-security",
     "mongoose": "7.6.3",
     "pino": "^8.20.0",
+    "pm2": "latest",
     "qrcode-terminal": "^0.12.0",
     "yt-search": "latest"
   }
