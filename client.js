@@ -214,7 +214,8 @@ const connect = async () => {
                     ?.text ??
                 m.message?.conversation
             )?.toLowerCase() || "";
-        kyy.reply = (jid, text) => kyy.sendMessage(jid, { text: text });
+        kyy.reply = (jid, text) =>
+            kyy.sendMessage(jid, { text: jsonFormat(text) });
         kyy.wait = (jid, keys) => {
             kyy.sendMessage(jid, { react: { text: "⌛", key: keys } });
         };
