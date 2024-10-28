@@ -1,11 +1,28 @@
 module.exports = async (m, out, kyy, a) => {
     let chat = await getOrCreateChat(m.key.remoteJid);
     kyy.wait(m.key.remoteJid, a.key);
-    let search = await Api.itzpire("ai/bing-ai", {
-        model: "Creative",
-        q: out.input
-    });
-    if (search.code !== 200) {
+    let search = await (
+        await fetch("https://ikyy-bard.hf.space/ai/bing", {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: [
+                    {
+                        role: "user",
+                        content:
+                            "lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa."
+                    },
+                    {
+                        role: "user",
+                        content: out.input
+                    }
+                ]
+            })
+        })
+    ).json();
+    if (!search.status) {
         let fail = await Api.widipe("post/gpt-prompt", {
             data: {
                 messages: [
@@ -35,11 +52,11 @@ module.exports = async (m, out, kyy, a) => {
             });
         });
     } else {
-        let convert_msg = await convert(search.result);
-        kyy.reply(m.key.remoteJid, convert_msg).then(async y => {
+        // let convert_msg = await convert(search.result);
+        kyy.reply(m.key.remoteJid, search.result).then(async y => {
             await updateChat(chat, {
                 role: "assistant",
-                content: `{"type": "text", "input": "${out.input}", "output": "${convert_msg}"}`
+                content: `{"type": "text", "input": "${out.input}", "output": "${search.result}"}`
             });
         });
     }
