@@ -17,6 +17,7 @@ const {
     updateChat,
     updateAllChatsSystemMessages
 } = require("./database");
+const { jsonFormat, simpleBind } = require("./lib/simple");
 global.getOrCreateChat = getOrCreateChat;
 global.updateChat = updateChat;
 class Api_feature {
@@ -173,6 +174,7 @@ const connect = async () => {
         browser: ["Chrome (Linux)", "", ""],
         logger: Pino({ level: "silent" })
     });
+    simpleBind(kyy);
     if (
         config.pairing &&
         config.pairing.state &&
@@ -215,60 +217,26 @@ const connect = async () => {
     });
     kyy.ev.on("messages.upsert", async ({ messages }) => {
         const m = messages[0];
-        const pesan =
+        const text =
             (
                 m.message?.extendedTextMessage?.text ??
                 m.message?.ephemeralMessage?.message?.extendedTextMessage
                     ?.text ??
                 m.message?.conversation
             )?.toLowerCase() || "";
-        kyy.reply = (jid, text) =>
-            kyy.sendMessage(jid, { text: jsonFormat(text) });
-        kyy.wait = (jid, keys) => {
-            kyy.sendMessage(jid, { react: { text: "⌛", key: keys } });
-        };
-        kyy.sendAudio = async (
-            jid,
-            audioinfo = {},
-            m,
-            title,
-            thumbnailUrl,
-            sourceUrl,
-            body = "",
-            LargerThumbnail = true,
-            AdAttribution = true
-        ) => {
-            return await kyy.sendMessage(
-                jid,
-                {
-                    ...audioinfo,
-                    contextInfo: {
-                        externalAdReply: {
-                            title: title,
-                            body: body,
-                            thumbnailUrl: thumbnailUrl,
-                            sourceUrl: sourceUrl,
-                            mediaType: 1,
-                            showAdAttribution: AdAttribution,
-                            renderLargerThumbnail: LargerThumbnail
-                        }
-                    }
-                },
-                { quoted: m }
-            );
-        };
-        //console.log(pesan)
+
+        //console.log(text)
         if (m.key.remoteJid.endsWith("@g.us")) {
             setTimeout(() => {
                 kyy.groupLeave(m.key.remoteJid);
             }, 5000);
         }
-        if (pesan && !m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
+        if (text && !m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
             kyy.readMessages([m.key]);
             const chat = await getOrCreateChat(m.key.remoteJid);
             await updateChat(chat, {
                 role: "user",
-                content: pesan
+                content: text
             });
             kyy.sendPresenceUpdate("composing", m.key.remoteJid);
             const response = await chatWithGPT(chat.conversations);
@@ -291,17 +259,4 @@ const connect = async () => {
 
 module.exports = { connect };
 
-const jsonFormat = obj => {
-    try {
-        let print =
-            obj &&
-            (obj.constructor.name == "Object" ||
-                obj.constructor.name == "Array")
-                ? require("util").format(JSON.stringify(obj, null, 2))
-                : require("util").format(obj);
-        return print;
-    } catch {
-        return require("util").format(obj);
-    }
-};
 //connect().catch(() => connect())
