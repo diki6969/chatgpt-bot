@@ -128,8 +128,16 @@ async function chatWithGPT(data_msg) {
         const bot = await Api.widipe("post/gpt-prompt", {
             data: { messages: data_msg }
         });
-        // ngembaliin respons dari bot
-        return jsonFormat(bot.result);
+        let response = jsonFormat(bot.result);
+        if (response === "undefined") {
+            return chatWithGPT(data_msg);
+        } else if (typeof response === "undefined") {
+            return chatWithGPT(data_msg);
+        } else if (response === undefined) {
+            return chatWithGPT(data_msg);
+        } else {
+            return response;
+        }
     } catch (e) {
         return jsonFormat(e);
     }
@@ -264,16 +272,8 @@ const connect = async () => {
             });
             kyy.sendPresenceUpdate("composing", m.key.remoteJid);
             const response = await chatWithGPT(chat.conversations);
-            let out;
-            if (response === "undefined") {
-                return;
-            } else if (typeof response === "undefined") {
-                return;
-            } else if (response === undefined) {
-                return;
-            } else {
-                out = JSON.parse(response);
-            }
+            let out = JSON.parse(response);
+
             kyy.reply(m.key.remoteJid, jsonFormat(out.output), m).then(
                 async a => {
                     await updateChat(chat, {
