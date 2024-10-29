@@ -87,7 +87,7 @@ const defaultSystemMessages = [
         role: "system",
         content: `semua respons harus mengikuti format JSON ini:
 
-{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini>" }`
+{ "type": "<tipe_respons>", "input": "<input dari gw di sini>", "output": "<respons lu di sini dan output harus berupa string, jangan pernah menghasilkan output object atau array disini>" }`
     },
     {
         role: "system",
