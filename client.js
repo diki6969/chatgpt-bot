@@ -224,6 +224,11 @@ const connect = async () => {
                     ?.text ??
                 m.message?.conversation
             )?.toLowerCase() || "";
+        const image = {
+            caption: m.message?.imageMessage?.caption,
+            mimeType: m.message?.imageMessage?.mimetype
+            download: m.message?.imageMessage ? m.download() : m.quoted.download
+        };
 
         //console.log(text)
         if (m.key.remoteJid.endsWith("@g.us")) {
@@ -231,28 +236,35 @@ const connect = async () => {
                 kyy.groupLeave(m.key.remoteJid);
             }, 5000);
         }
-        if (text && !m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
-            kyy.readMessages([m.key]);
-            const chat = await getOrCreateChat(m.key.remoteJid);
-            await updateChat(chat, {
-                role: "user",
-                content: text
-            });
-            kyy.sendPresenceUpdate("composing", m.key.remoteJid);
-            const response = await chatWithGPT(chat.conversations);
-            let out = JSON.parse(response);
+        if (!m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
+            if (text !== "") {
+              if (m.key.remoteJid.startsWith("6289514509029") && text.startsWith("=>")) {
+                let exec = text.split("=> ")[1]
+                return reply(exec);
+              }
+                kyy.readMessages([m.key]);
+                const chat = await getOrCreateChat(m.key.remoteJid);
+                await updateChat(chat, {
+                    role: "user",
+                    content: text
+                });
+                kyy.sendPresenceUpdate("composing", m.key.remoteJid);
+                const response = await chatWithGPT(chat.conversations);
+                let out = JSON.parse(response);
 
-            kyy.reply(m.key.remoteJid, jsonFormat(out.output), m).then(
-                async a => {
-                    await updateChat(chat, {
-                        role: "assistant",
-                        content: response
-                    });
-                    if (plugins[out.type]) {
-                        await plugins[out.type](m, out, kyy, a);
+                kyy.reply(m.key.remoteJid, jsonFormat(out.output), m).then(
+                    async a => {
+                        await updateChat(chat, {
+                            role: "assistant",
+                            content: response
+                        });
+                        if (plugins[out.type]) {
+                            await plugins[out.type](m, out, kyy, a);
+                        }
                     }
-                }
-            );
+                );
+            } else if (nannaa) {
+            }
         }
     });
 };
