@@ -1,4 +1,5 @@
 const baileys = require("@whiskeysockets/baileys");
+const ai = require("unlimied-ai");
 const axios = require("axios");
 const yts = require("yt-search");
 const {
@@ -124,9 +125,9 @@ class Api_feature {
 }
 
 global.Api = new Api_feature();
-async function chatWithGPT(data_msg) {
+global.chatWithGPT = async data_msg => {
     try {
-        const bot = await Api.widipe("post/gpt-prompt", {
+        /*const bot = await Api.widipe("post/gpt-prompt", {
             data: { messages: data_msg }
         });
         let response = jsonFormat(bot.result);
@@ -138,11 +139,15 @@ async function chatWithGPT(data_msg) {
             return chatWithGPT(data_msg);
         } else {
             return response;
-        }
+        }*/
+
+        const model = "claude-3-5-sonnet-20240620";
+        const res = await ai.generate(model, data_msg);
+        return jsonFormat(res);
     } catch (e) {
         return jsonFormat(e);
     }
-}
+};
 
 const plugins = {};
 
