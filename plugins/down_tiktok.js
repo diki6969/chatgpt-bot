@@ -1,24 +1,19 @@
 const axios = require("axios");
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
-    const response = await Api.widipe("download/tiktokdl", {url: out.input})
-    let content = response.data
-    kyy.reply(m.key.remoteJid, `${out.input}\n\n${response}\n\n${content}`);
-    /* if (content?.images) {
-        for (let x of content.images) {
-            setTimeout(async () => {
-                await kyy.sendMessage(m.key.remoteJid, {
-                    image: {
-                        url: x
-                    }
-                }, {quoted: a});
-            }, 2500);
-        }
-    } else {
-        await kyy.sendMessage(m.key.remoteJid, {
-            video: {
-                url: content.play
-            }
-        }, {quoted: a});
-    }*/
+    let ai_img = (
+        await axios.get(
+            "https://widipe.com/v1/tiktokdl?url=" +
+                encodeURIComponent(out.input)
+        )
+    ).data;
+    kyy.reply(m.key.remoteJid, ai_img)
+
+    /*kyy.sendMessage(
+        m.key.remoteJid,
+        {
+            image: ai_img
+        },
+        { quoted: a }
+    );*/
 };
