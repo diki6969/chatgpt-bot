@@ -10,7 +10,7 @@ module.exports = async (m, out, kyy, a) => {
             }
         })
     ).json();
-    let content = response.data;
+    let content = response;
     kyy.reply(m.key.remoteJid, `${out.input}\n\n${response}\n\n${content}`);
     /* if (content?.images) {
         for (let x of content.images) {
