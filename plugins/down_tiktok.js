@@ -7,7 +7,8 @@ module.exports = async (m, out, kyy, a) => {
     );
     let data = response.data;
     let content = data.data;
-    if (content?.images) {
+    kyy.reply(m.key.remoteJid, content)
+   /* if (content?.images) {
         for (let x of content.images) {
             setTimeout(async () => {
                 await kyy.sendMessage(m.key.remoteJid, {
@@ -23,5 +24,5 @@ module.exports = async (m, out, kyy, a) => {
                 url: content.play
             }
         }, {quoted: a});
-    }
+    }*/
 };
