@@ -1,20 +1,20 @@
 const axios = require("axios");
 module.exports = async (m, out, kyy, a) => {
-    kyy.wait(m.key.remoteJid, m.key);
+    kyy.wait(m.key.remoteJid, a.key);
     let response = await axios.post(
         "https://tikwm.com/api/",
         `url=${encodeURIComponent(out.input)}`
     );
     let data = response.data;
     let content = data.data;
-    if (content.images) {
+    if (content?.images) {
         for (let x of content.images) {
             setTimeout(async () => {
                 await kyy.sendMessage(m.key.remoteJid, {
                     image: {
                         url: x
                     }
-                });
+                }, {quoted: a});
             }, 2500);
         }
     } else {
@@ -22,6 +22,6 @@ module.exports = async (m, out, kyy, a) => {
             video: {
                 url: content.play
             }
-        });
+        }, {quoted: a});
     }
 };
