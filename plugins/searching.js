@@ -23,9 +23,7 @@ module.exports = async (m, out, kyy, a) => {
         })
     ).json();
     if (!search.status) {
-        let fail = await Api.widipe("post/gpt-prompt", {
-            data: {
-                messages: [
+        let fail = await chatWithGPT([
                     {
                         role: "system",
                         content:
@@ -35,9 +33,7 @@ module.exports = async (m, out, kyy, a) => {
                         role: "user",
                         content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet`
                     }
-                ]
-            }
-        });
+                ])
         if (!fail.status)
             return kyy.reply(m.key.remoteJid, "gagal").then(async y => {
                 await updateChat(chat, {
@@ -63,9 +59,7 @@ module.exports = async (m, out, kyy, a) => {
 };
 
 async function convert(msg) {
-    let conv = await Api.widipe("post/gpt-prompt", {
-        data: {
-            messages: [
+    let conv = await chatWithGPT([
                 {
                     role: "system",
                     content:
@@ -75,18 +69,6 @@ async function convert(msg) {
                     role: "user",
                     content: `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`
                 }
-            ]
-        }
-    });
-    if (!conv.status) {
-        return convert(msg);
-    } else if (conv.result === "undefined") {
-        return convert(msg);
-    } else if (typeof conv.result === "undefined") {
-        return convert(msg);
-    } else if (conv.result === undefined) {
-        return convert(msg);
-    } else {
-        return conv.result;
-    }
+            ])
+    return conv;
 }
