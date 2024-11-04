@@ -1,9 +1,7 @@
 console.log("Starting . . .");
 require("rootpath")(), require("./server");
 const { spawn: spawn } = require("child_process"),
-    path = require("path"),
-    colors = require("@colors/colors/safe"),
-    CFonts = require("cfonts");
+    path = require("path");
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 process.on("uncaughtException", console.error);
 
@@ -25,14 +23,5 @@ function start() {
         });
 }
 
-CFonts.say("IKYY BOT", {
-    font: "tiny",
-    align: "center",
-    colors: ["system"]
-}),
-    CFonts.say("PRIVATE SC", {
-        colors: ["system"],
-        font: "console",
-        align: "center"
-    }),
-    start();
+console.log("AI IKYY");
+start();
