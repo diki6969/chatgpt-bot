@@ -1,14 +1,14 @@
 const axios = require("axios");
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
-    let res = await Api.widipe("download/tiktokdl", {url: out.input})
-    kyy.reply(m.key.remoteJid, res)
-
-    /*kyy.sendMessage(
+    let res = await Api.widipe("download/tiktokdl", { url: out.input });
+    kyy.sendMessage(
         m.key.remoteJid,
         {
-            image: ai_img
+            video: {
+                url: res.result.video
+            }
         },
         { quoted: a }
-    );*/
+    );
 };
