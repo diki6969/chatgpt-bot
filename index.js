@@ -1,5 +1,5 @@
 console.log("Starting . . .");
-require("rootpath")(), require("./server");
+require("dotenv").config(), require("rootpath")(), require("./server");
 const { spawn: spawn } = require("child_process"),
     path = require("path");
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
