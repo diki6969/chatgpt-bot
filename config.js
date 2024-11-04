@@ -23,7 +23,7 @@ global.defaultSystemMessages = [
     },
     {
         role: "system",
-        content: `kalo gw kirim url atau link dari konten tiktok, ubah 'type' jadi 'tiktok_download'. kalo gw belum nyuruh buat download, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'tiktok_download' kalo url atau link nya bukan dari konten tiktok. kalo udah di klarifikasi dan url atau link nya udah dari konten tiktok, isi 'input' dengan url atau link nya aja, jangan sertakan teks lain selain url atau link dari konten tiktok yang gw kasih dan 'output' diisi dengan pesan kalo konten tiktok itu lagi didownload lalu dikirim.`
+        content: `kalo gw kirim url atau link dari konten tiktok, ubah 'type' jadi 'ttdown'. kalo gw belum nyuruh buat download, tanyain untuk klarifikasi dan jangan ubah 'type' jadi 'ttdown' kalo url atau link nya bukan dari konten tiktok. kalo udah di klarifikasi dan url atau link nya udah dari konten tiktok, isi 'input' dengan url atau link nya aja, jangan sertakan teks lain selain url atau link dari konten tiktok yang gw kasih dan 'output' diisi dengan pesan kalo konten tiktok itu lagi didownload lalu dikirim.`
     },
     {
         role: "system",
