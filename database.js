@@ -52,6 +52,49 @@ chatSchema.pre("save", function (next) {
 
 const Chat = mongoose.model("Chat", chatSchema);
 
+// Buffer untuk menyimpan pesan sementara
+let messageBuffer = new Map();
+let isProcessing = false;
+const MAX_BUFFER_SIZE = 5000;
+
+// Fungsi untuk memproses buffer dan menyimpan ke DB
+async function processMessageBuffer() {
+    if (isProcessing || messageBuffer.size === 0) return;
+    
+    isProcessing = true;
+    const currentBuffer = new Map(messageBuffer);
+    messageBuffer.clear();
+
+    try {
+        const updates = Array.from(currentBuffer.entries()).map(async ([userId, messages]) => {
+            const chat = await Chat.findOne({ userId });
+            if (!chat) return;
+
+            chat.conversations.push(...messages);
+            chat.lastUpdate = new Date();
+            return chat.save();
+        });
+
+        await Promise.all(updates);
+        console.log(`Processed ${currentBuffer.size} chat updates`);
+    } catch (error) {
+        console.error('Error processing message buffer:', error);
+        // Mengembalikan pesan yang gagal diproses ke buffer
+        for (const [userId, messages] of currentBuffer.entries()) {
+            if (!messageBuffer.has(userId)) {
+                messageBuffer.set(userId, messages);
+            } else {
+                messageBuffer.get(userId).push(...messages);
+            }
+        }
+    } finally {
+        isProcessing = false;
+    }
+}
+
+// Jalankan processor setiap 5 detik
+setInterval(processMessageBuffer, 5000);
+
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.mongodb, {
@@ -133,13 +176,30 @@ async function getOrCreateChat(userId) {
 
 async function updateChat(chat, newMessage) {
     try {
-        chat.conversations.push(newMessage);
-        chat.lastUpdate = new Date();
-        await chat.save();
-        return chat;
+        if (!messageBuffer.has(chat.userId)) {
+            messageBuffer.set(chat.userId, []);
+        }
+        messageBuffer.get(chat.userId).push(newMessage);
+
+        // Force process jika buffer terlalu besar
+        if (messageBuffer.size >= MAX_BUFFER_SIZE) {
+            processMessageBuffer();
+        }
+
+        return {
+            ...chat.toObject(),
+            conversations: [...chat.conversations, newMessage],
+            lastUpdate: new Date()
+        };
     } catch (error) {
         console.error("Error in updateChat:", error);
         throw error;
+    }
+}
+
+async function flushMessageBuffer() {
+    if (messageBuffer.size > 0) {
+        await processMessageBuffer();
     }
 }
 
@@ -160,10 +220,17 @@ setInterval(
     24 * 60 * 60 * 1000
 );
 
+// Handler untuk graceful shutdown
+process.on('SIGTERM', async () => {
+    await flushMessageBuffer();
+    process.exit(0);
+});
+
 module.exports = {
     connectDB,
     Chat,
     getOrCreateChat,
     updateChat,
-    updateAllChatsSystemMessages
+    updateAllChatsSystemMessages,
+    flushMessageBuffer
 };
