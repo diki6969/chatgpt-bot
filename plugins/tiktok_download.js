@@ -1,6 +1,6 @@
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
-    let img = await Api.widipe("download/tikdl", {
+    let res = await Api.widipe("download/tikdl", {
         url: out.input
     });
     kyy.sendMessage(
