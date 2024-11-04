@@ -3,7 +3,7 @@ module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
     let ai_img = (
         await axios.get(
-            "https://widipe.com/v1/tiktokdl?url=" +
+            "https://widipe.com/tiktokdl?url=" +
                 encodeURIComponent(out.input)
         )
     ).data;
