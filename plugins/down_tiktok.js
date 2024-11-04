@@ -6,7 +6,7 @@ module.exports = async (m, out, kyy, a) => {
     kyy.sendMessage(
         m.key.remoteJid,
         {
-            audio: { url: res.result.video[0] }
+            video: { url: res.result.video[0] }
         },
         { quoted: a }
     );
