@@ -263,6 +263,4 @@ const connect = async () => {
     });
 };
 
-module.exports = { connect };
-
-//connect().catch(() => connect())
+connect().catch(() => connect());
