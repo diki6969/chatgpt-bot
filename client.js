@@ -139,9 +139,7 @@ const connect = async () => {
         const message = messages[0];
         if (!message.key.fromMe && message.message) {
             const userId = message.key.remoteJid;
-            const userMessage =
-                message.message.conversation ||
-                message.message.extendedTextMessage.text;
+            const userMessage = message.message.extendedTextMessage?.text || '';
 
             const chat = await getOrCreateChat(userId);
             const newMessage = {
