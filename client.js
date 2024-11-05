@@ -1,11 +1,20 @@
 require("./config");
-const { default: makeWaSocket, useMultiFileAuthState, PHONENUMBER_MCC } = require("@whiskeysockets/baileys");
+const {
+    default: makeWaSocket,
+    useMultiFileAuthState,
+    PHONENUMBER_MCC
+} = require("@whiskeysockets/baileys");
 const ai = require("unlimited-ai");
 const axios = require("axios");
 const Pino = require("pino");
 const fs = require("fs").promises;
 const colors = require("@colors/colors/safe");
-const { connectDB, getOrCreateChat, updateChat, updateAllChatsSystemMessages } = require("./database");
+const {
+    connectDB,
+    getOrCreateChat,
+    updateChat,
+    updateAllChatsSystemMessages
+} = require("./database");
 const { jsonFormat, simpleBind } = require("./lib/simple");
 
 class ApiFeature {
@@ -36,9 +45,12 @@ class ApiFeature {
         }
     }
 
-    nazuna = (endpoint, options) => this.makeRequest(this.baseUrls.Nazuna, endpoint, options);
-    widipe = (endpoint, options) => this.makeRequest(this.baseUrls.Widipe, endpoint, options);
-    itzpire = (endpoint, options) => this.makeRequest(this.baseUrls.Itzpire, endpoint, options);
+    nazuna = (endpoint, options) =>
+        this.makeRequest(this.baseUrls.Nazuna, endpoint, options);
+    widipe = (endpoint, options) =>
+        this.makeRequest(this.baseUrls.Widipe, endpoint, options);
+    itzpire = (endpoint, options) =>
+        this.makeRequest(this.baseUrls.Itzpire, endpoint, options);
 }
 
 const Api = new ApiFeature();
@@ -50,7 +62,7 @@ async function chatWithGPT(data_msg) {
         return jsonFormat(res);
     } catch (e) {
         console.error("Error in chatWithGPT:", e);
-        return jsonFormat(e);
+        return await chatWithGPT(data_msg);
     }
 }
 
@@ -73,7 +85,9 @@ async function connect() {
 
     if (config.pairing?.state && !kyy.authState.creds.registered) {
         const phoneNumber = config.pairing.number;
-        if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
+        if (
+            !Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))
+        ) {
             console.log(colors.red("Invalid phone number"));
             return;
         }
@@ -92,9 +106,15 @@ async function connect() {
 
     kyy.ev.on("connection.update", async ({ connection, lastDisconnect }) => {
         if (connection === "open") {
-            console.log(colors.green("Successfully Connected With ") + colors.cyan(kyy.user.name));
+            console.log(
+                colors.green("Successfully Connected With ") +
+                    colors.cyan(kyy.user.name)
+            );
         } else if (connection === "close") {
-            if (lastDisconnect?.output?.statusCode !== DisconnectReason.loggedOut) {
+            if (
+                lastDisconnect?.output?.statusCode !==
+                DisconnectReason.loggedOut
+            ) {
                 connect();
             }
         }
@@ -102,9 +122,11 @@ async function connect() {
 
     kyy.ev.on("messages.upsert", async ({ messages }) => {
         const m = messages[0];
-        const text = m.message?.extendedTextMessage?.text || 
-                     m.message?.ephemeralMessage?.message?.extendedTextMessage?.text || 
-                     m.message?.conversation || "";
+        const text =
+            m.message?.extendedTextMessage?.text ||
+            m.message?.ephemeralMessage?.message?.extendedTextMessage?.text ||
+            m.message?.conversation ||
+            "";
 
         if (m.key.remoteJid.endsWith("@g.us")) {
             setTimeout(() => kyy.groupLeave(m.key.remoteJid), 5000);
@@ -113,27 +135,33 @@ async function connect() {
 
         if (!m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
             kyy.readMessages([m.key]).then(() => {
-    getOrCreateChat(m.key.remoteJid).then(chat => {
-        updateChat(chat, {
-            role: "user",
-            content: text
-        }).then(() => {
-            kyy.sendPresenceUpdate("composing", m.key.remoteJid).then(() => {
-                chatWithGPT(chat.conversations).then(response => {
-                    kyy.reply(m.key.remoteJid, jsonFormat(response), m).then(
-                        a => {
-                            updateChat(chat, {
-                                role: "assistant",
-                                content: response
-                            });
-                        }
-                    );
+                getOrCreateChat(m.key.remoteJid).then(chat => {
+                    updateChat(chat, {
+                        role: "user",
+                        content: text
+                    }).then(() => {
+                        kyy.sendPresenceUpdate(
+                            "composing",
+                            m.key.remoteJid
+                        ).then(() => {
+                            chatWithGPT(chat.conversations?.messages).then(
+                                response => {
+                                    kyy.reply(
+                                        m.key.remoteJid,
+                                        jsonFormat(response),
+                                        m
+                                    ).then(a => {
+                                        updateChat(chat, {
+                                            role: "assistant",
+                                            content: response
+                                        });
+                                    });
+                                }
+                            );
+                        });
+                    });
                 });
             });
-        });
-    });
-});
-
         }
     });
 }
