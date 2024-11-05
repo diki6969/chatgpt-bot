@@ -1,109 +1,114 @@
 const mongoose = require("mongoose");
+const { EventEmitter } = require('events');
 
 mongoose.set("strictQuery", false);
 
-const chatSchema = new mongoose.Schema(
-    {
-        userId: {
+const chatSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true,
+        index: true
+    },
+    conversations: [{
+        role: {
             type: String,
             required: true,
-            index: true
+            enum: ["system", "user", "assistant"]
         },
-        conversations: [
-            {
-                role: {
-                    type: String,
-                    required: true,
-                    enum: ["system", "user", "assistant"]
-                },
-                content: {
-                    type: String,
-                    required: true
-                },
-                timestamp: {
-                    type: Date,
-                    default: Date.now
-                }
-            }
-        ],
-        lastUpdate: {
+        content: {
+            type: String,
+            required: true
+        },
+        timestamp: {
             type: Date,
-            default: Date.now,
-            index: true
+            default: Date.now
         }
-    },
-    {
-        timestamps: true
+    }],
+    lastUpdate: {
+        type: Date,
+        default: Date.now,
+        index: true
     }
-);
+}, { timestamps: true });
 
-chatSchema.pre("save", function (next) {
-    if (this.conversations.filter(msg => msg.role !== "system").length > 65) {
-        const systemMessages = this.conversations.filter(
-            msg => msg.role === "system"
-        );
-        const recentMessages = this.conversations
-            .filter(msg => msg.role !== "system")
-            .slice(-64);
-        this.conversations = [...systemMessages, ...recentMessages];
-    }
+chatSchema.pre("save", function(next) {
+    const systemMessages = this.conversations.filter(msg => msg.role === "system");
+    const userAssistantMessages = this.conversations.filter(msg => msg.role !== "system").slice(-64);
+    this.conversations = [...systemMessages, ...userAssistantMessages];
     next();
 });
 
 const Chat = mongoose.model("Chat", chatSchema);
 
-// Buffer untuk menyimpan pesan sementara
-let messageBuffer = new Map();
-let isProcessing = false;
-const MAX_BUFFER_SIZE = 5000;
+class BufferManager extends EventEmitter {
+    constructor(maxSize = 5000, flushInterval = 5000) {
+        super();
+        this.buffer = new Map();
+        this.maxSize = maxSize;
+        this.flushInterval = flushInterval;
+        this.isProcessing = false;
+        this.startAutoFlush();
+    }
 
-// Fungsi untuk memproses buffer dan menyimpan ke DB
-async function processMessageBuffer() {
-    if (isProcessing || messageBuffer.size === 0) return;
-    
-    isProcessing = true;
-    const currentBuffer = new Map(messageBuffer);
-    messageBuffer.clear();
-
-    try {
-        const updates = Array.from(currentBuffer.entries()).map(async ([userId, messages]) => {
-            const chat = await Chat.findOne({ userId });
-            if (!chat) return;
-
-            chat.conversations.push(...messages);
-            chat.lastUpdate = new Date();
-            return chat.save();
-        });
-
-        await Promise.all(updates);
-        console.log(`Processed ${currentBuffer.size} chat updates`);
-    } catch (error) {
-        console.error('Error processing message buffer:', error);
-        // Mengembalikan pesan yang gagal diproses ke buffer
-        for (const [userId, messages] of currentBuffer.entries()) {
-            if (!messageBuffer.has(userId)) {
-                messageBuffer.set(userId, messages);
-            } else {
-                messageBuffer.get(userId).push(...messages);
-            }
+    add(userId, message) {
+        if (!this.buffer.has(userId)) {
+            this.buffer.set(userId, []);
         }
-    } finally {
-        isProcessing = false;
+        this.buffer.get(userId).push(message);
+        if (this.buffer.size >= this.maxSize) {
+            this.flush();
+        }
+    }
+
+    startAutoFlush() {
+        setInterval(() => this.flush(), this.flushInterval);
+    }
+
+    async flush() {
+        if (this.isProcessing || this.buffer.size === 0) return;
+        this.isProcessing = true;
+        const currentBuffer = new Map(this.buffer);
+        this.buffer.clear();
+
+        try {
+            const bulkOps = Array.from(currentBuffer.entries()).map(([userId, messages]) => ({
+                updateOne: {
+                    filter: { userId },
+                    update: {
+                        $push: { conversations: { $each: messages } },
+                        $set: { lastUpdate: new Date() }
+                    },
+                    upsert: true
+                }
+            }));
+
+            await Chat.bulkWrite(bulkOps);
+            console.log(`Processed ${currentBuffer.size} chat updates`);
+            this.emit('flushed', currentBuffer.size);
+        } catch (error) {
+            console.error('Error flushing buffer:', error);
+            // Return failed messages to buffer
+            for (const [userId, messages] of currentBuffer.entries()) {
+                this.add(userId, ...messages);
+            }
+            this.emit('flushError', error);
+        } finally {
+            this.isProcessing = false;
+        }
     }
 }
 
-// Jalankan processor setiap 5 detik
-setInterval(processMessageBuffer, 5000);
+const bufferManager = new BufferManager();
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.mongodb, {
+        await mongoose.connect(process.env.mongodb, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000,
+            maxPoolSize: 10
         });
-
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-
+        console.log(`MongoDB Connected: ${mongoose.connection.host}`);
         await Chat.collection.createIndex({ userId: 1 });
         await Chat.collection.createIndex({ lastUpdate: 1 });
     } catch (error) {
@@ -123,18 +128,24 @@ mongoose.connection.on("error", err => {
 
 async function updateAllChatsSystemMessages() {
     try {
-        const chats = await Chat.find({});
+        const defaultSystemMessages = [/* Your default system messages here */];
+        const bulkOps = await Chat.find({}).then(chats => 
+            chats.map(chat => ({
+                updateOne: {
+                    filter: { _id: chat._id },
+                    update: {
+                        $set: {
+                            conversations: [
+                                ...defaultSystemMessages,
+                                ...chat.conversations.filter(msg => msg.role !== "system")
+                            ]
+                        }
+                    }
+                }
+            }))
+        );
 
-        for (const chat of chats) {
-            chat.conversations = chat.conversations.filter(
-                msg => msg.role !== "system"
-            );
-
-            chat.conversations.unshift(...defaultSystemMessages);
-
-            await chat.save();
-        }
-
+        await Chat.bulkWrite(bulkOps);
         console.log("Successfully updated all chats with new system messages");
     } catch (error) {
         console.error("Error updating system messages:", error);
@@ -143,6 +154,7 @@ async function updateAllChatsSystemMessages() {
 
 async function getOrCreateChat(userId) {
     try {
+        const defaultSystemMessages = [/* Your default system messages here */];
         let chat = await Chat.findOne({ userId });
 
         if (!chat) {
@@ -152,13 +164,8 @@ async function getOrCreateChat(userId) {
             });
             await chat.save();
         } else {
-            const currentSystemMessages = chat.conversations.filter(
-                msg => msg.role === "system"
-            );
-            if (
-                JSON.stringify(currentSystemMessages) !==
-                JSON.stringify(defaultSystemMessages)
-            ) {
+            const currentSystemMessages = chat.conversations.filter(msg => msg.role === "system");
+            if (JSON.stringify(currentSystemMessages) !== JSON.stringify(defaultSystemMessages)) {
                 chat.conversations = [
                     ...defaultSystemMessages,
                     ...chat.conversations.filter(msg => msg.role !== "system")
@@ -176,16 +183,7 @@ async function getOrCreateChat(userId) {
 
 async function updateChat(chat, newMessage) {
     try {
-        if (!messageBuffer.has(chat.userId)) {
-            messageBuffer.set(chat.userId, []);
-        }
-        messageBuffer.get(chat.userId).push(newMessage);
-
-        // Force process jika buffer terlalu besar
-        if (messageBuffer.size >= MAX_BUFFER_SIZE) {
-            processMessageBuffer();
-        }
-
+        bufferManager.add(chat.userId, newMessage);
         return {
             ...chat.toObject(),
             conversations: [...chat.conversations, newMessage],
@@ -198,31 +196,24 @@ async function updateChat(chat, newMessage) {
 }
 
 async function flushMessageBuffer() {
-    if (messageBuffer.size > 0) {
-        await processMessageBuffer();
-    }
+    await bufferManager.flush();
 }
 
-setInterval(
-    async () => {
-        try {
-            const thirtyDaysAgo = new Date(
-                Date.now() - 30 * 24 * 60 * 60 * 1000
-            );
-            const result = await Chat.deleteMany({
-                lastUpdate: { $lt: thirtyDaysAgo }
-            });
-            console.log(`Cleaned ${result.deletedCount} old chat records`);
-        } catch (error) {
-            console.error("Error in cleanup routine:", error);
-        }
-    },
-    24 * 60 * 60 * 1000
-);
+// Cleanup old chats
+setInterval(async () => {
+    try {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const result = await Chat.deleteMany({ lastUpdate: { $lt: thirtyDaysAgo } });
+        console.log(`Cleaned ${result.deletedCount} old chat records`);
+    } catch (error) {
+        console.error("Error in cleanup routine:", error);
+    }
+}, 24 * 60 * 60 * 1000);
 
-// Handler untuk graceful shutdown
+// Graceful shutdown handler
 process.on('SIGTERM', async () => {
     await flushMessageBuffer();
+    await mongoose.connection.close();
     process.exit(0);
 });
 
