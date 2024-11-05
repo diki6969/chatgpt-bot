@@ -19,8 +19,6 @@ const {
     updateAllChatsSystemMessages
 } = require("./database");
 const { jsonFormat, simpleBind } = require("./lib/simple");
-global.getOrCreateChat = getOrCreateChat;
-global.updateChat = updateChat;
 
 class ApiFeature {
     constructor() {
@@ -55,14 +53,17 @@ class ApiFeature {
         }
     }
 
-    nazuna = (endpoint, options) => this.makeRequest(this.endpoints.nazuna, endpoint, options);
-    widipe = (endpoint, options) => this.makeRequest(this.endpoints.widipe, endpoint, options);
-    itzpire = (endpoint, options) => this.makeRequest(this.endpoints.itzpire, endpoint, options);
+    nazuna = (endpoint, options) =>
+        this.makeRequest(this.endpoints.nazuna, endpoint, options);
+    widipe = (endpoint, options) =>
+        this.makeRequest(this.endpoints.widipe, endpoint, options);
+    itzpire = (endpoint, options) =>
+        this.makeRequest(this.endpoints.itzpire, endpoint, options);
 }
 
-global.Api = new ApiFeature();
+let Api = new ApiFeature();
 
-global.chatWithGPT = async data_msg => {
+let chatWithGPT = async data_msg => {
     try {
         const model = "gemini-1.5-pro-exp-0827";
         const res = await ai.generate(model, data_msg);
@@ -87,9 +88,17 @@ const connect = async () => {
     });
     simpleBind(kyy);
 
-    if (config.pairing && config.pairing.state && !kyy.authState.creds.registered) {
+    if (
+        config.pairing &&
+        config.pairing.state &&
+        !kyy.authState.creds.registered
+    ) {
         const phoneNumber = config.pairing.number;
-        if (!Object.keys(PHONENUMBER_MCC).some(v => String(phoneNumber).startsWith(v))) {
+        if (
+            !Object.keys(PHONENUMBER_MCC).some(v =>
+                String(phoneNumber).startsWith(v)
+            )
+        ) {
             console.log(colors.red("Invalid phone number"));
             return;
         }
@@ -108,11 +117,19 @@ const connect = async () => {
     kyy.ev.on("connection.update", async update => {
         const { connection, lastDisconnect } = update;
         if (connection === "open") {
-            console.log(colors.green("Successfully Connected With ") + colors.cyan(kyy.user .username));
+            console.log(
+                colors.green("Successfully Connected With ") +
+                    colors.cyan(kyy.user.username)
+            );
             kyy.sendMessage(kyy.user.id, { text: "Bot is online!" });
         } else if (connection === "close") {
-            console.log(colors.red("Connection closed, attempting to reconnect..."));
-            if (lastDisconnect.error && lastDisconnect.error.output.statusCode !== 401) {
+            console.log(
+                colors.red("Connection closed, attempting to reconnect...")
+            );
+            if (
+                lastDisconnect.error &&
+                lastDisconnect.error.output.statusCode !== 401
+            ) {
                 connect();
             }
         }
@@ -122,7 +139,9 @@ const connect = async () => {
         const message = messages[0];
         if (!message.key.fromMe && message.message) {
             const userId = message.key.remoteJid;
-            const userMessage = message.message.conversation || message.message.extendedTextMessage.text;
+            const userMessage =
+                message.message.conversation ||
+                message.message.extendedTextMessage.text;
 
             const chat = await getOrCreateChat(userId);
             const newMessage = {
