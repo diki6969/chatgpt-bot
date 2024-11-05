@@ -73,21 +73,6 @@ global.chatWithGPT = async data_msg => {
     }
 };
 
-const plugins = {};
-
-function loadPlugins() {
-    const pluginDir = path.join(__dirname, "plugins");
-    fs.readdirSync(pluginDir).forEach(file => {
-        if (file.endsWith(".js")) {
-            const pluginName = path.basename(file, ".js");
-            plugins[pluginName] = require(path.join(pluginDir, file));
-            console.log(`Plugin ${pluginName} telah dimuat.`);
-        }
-    });
-}
-
-loadPlugins();
-
 const connect = async () => {
     await connectDB();
     await updateAllChatsSystemMessages();
