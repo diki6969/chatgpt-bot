@@ -144,7 +144,7 @@ async function connect() {
                             "composing",
                             m.key.remoteJid
                         ).then(() => {
-                            chatWithGPT(chat.conversations?.messages).then(
+                            chatWithGPT(chat.conversations).then(
                                 response => {
                                     kyy.reply(
                                         m.key.remoteJid,
