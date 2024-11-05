@@ -128,7 +128,6 @@ mongoose.connection.on("error", err => {
 
 async function updateAllChatsSystemMessages() {
     try {
-        const defaultSystemMessages = [/* Your default system messages here */];
         const bulkOps = await Chat.find({}).then(chats => 
             chats.map(chat => ({
                 updateOne: {
@@ -154,7 +153,6 @@ async function updateAllChatsSystemMessages() {
 
 async function getOrCreateChat(userId) {
     try {
-        const defaultSystemMessages = [/* Your default system messages here */];
         let chat = await Chat.findOne({ userId });
 
         if (!chat) {
