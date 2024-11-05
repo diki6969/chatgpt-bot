@@ -19,52 +19,126 @@ const {
     updateAllChatsSystemMessages
 } = require("./database");
 const { jsonFormat, simpleBind } = require("./lib/simple");
-
-class ApiFeature {
+class Api_feature {
     constructor() {
-        this.endpoints = {
-            nazuna: "https://api.nazuna.my.id/api/",
-            widipe: "https://widipe.com/",
-            itzpire: "https://itzpire.com/"
-        };
-        this.axiosInstance = axios.create({
-            timeout: 10000,
-            headers: {
-                accept: "*/*"
-            }
-        });
+        this.Nazuna = "https://api.nazuna.my.id/api/";
+        this.Widipe = "https://widipe.com/";
+        this.Itzpire = "https://itzpire.com/";
+        //this.apiKey = process.env.API_KEYS;
     }
 
-    async makeRequest(baseURL, endpoint, options = {}) {
+    nazuna = (endpoint, options = {}) => {
         const { data, ...params } = options;
         const method = data ? "POST" : "GET";
 
-        try {
-            const response = await this.axiosInstance({
-                baseURL,
-                url: endpoint,
-                method,
-                ...(method === "GET" && { params }),
-                ...(method === "POST" && { data })
-            });
-            return response.data;
-        } catch (e) {
-            return e.response?.data || e;
-        }
-    }
+        const config = {
+            baseURL: this.Nazuna,
+            url: endpoint,
+            method: method,
+            headers: {
+                //Authorization: this.apiKey,
+                accept: "*/*"
+            },
+            ...(method === "GET" && { params: params }),
+            ...(method === "POST" && { data: data })
+        };
 
-    nazuna = (endpoint, options) =>
-        this.makeRequest(this.endpoints.nazuna, endpoint, options);
-    widipe = (endpoint, options) =>
-        this.makeRequest(this.endpoints.widipe, endpoint, options);
-    itzpire = (endpoint, options) =>
-        this.makeRequest(this.endpoints.itzpire, endpoint, options);
+        return new Promise((resolve, reject) => {
+            axios
+                .request(config)
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(e => {
+                    if (e.response) {
+                        resolve(e.response.data);
+                    } else {
+                        resolve(e);
+                    }
+                });
+        });
+    };
+    widipe = (endpoint, options = {}) => {
+        const { data, ...params } = options;
+        const method = data ? "POST" : "GET";
+
+        const config = {
+            baseURL: this.Widipe,
+            url: endpoint,
+            method: method,
+            headers: {
+                //Authorization: this.apiKey,
+                accept: "*/*"
+            },
+            ...(method === "GET" && { params: params }),
+            ...(method === "POST" && { data: data })
+        };
+
+        return new Promise((resolve, reject) => {
+            axios
+                .request(config)
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(e => {
+                    if (e.response) {
+                        resolve(e.response.data);
+                    } else {
+                        resolve(e);
+                    }
+                });
+        });
+    };
+    itzpire = (endpoint, options = {}) => {
+        const { data, ...params } = options;
+        const method = data ? "POST" : "GET";
+
+        const config = {
+            baseURL: this.Itzpire,
+            url: endpoint,
+            method: method,
+            headers: {
+                //Authorization: this.apiKey,
+                accept: "*/*"
+            },
+            ...(method === "GET" && { params: params }),
+            ...(method === "POST" && { data: data })
+        };
+
+        return new Promise((resolve, reject) => {
+            axios
+                .request(config)
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(e => {
+                    if (e.response) {
+                        resolve(e.response.data);
+                    } else {
+                        resolve(e);
+                    }
+                });
+        });
+    };
 }
 
-let Api = new ApiFeature();
-
+let Api = new Api_feature();
 let chatWithGPT = async data_msg => {
     try {
+        /*const bot = await Api.widipe("post/gpt-prompt", {
+            data: { messages: data_msg }
+        });
+        let response = jsonFormat(bot.result);
+        if (response === "undefined") {
+            return chatWithGPT(data_msg);
+        } else if (typeof response === "undefined") {
+            return chatWithGPT(data_msg);
+        } else if (response === undefined) {
+            return chatWithGPT(data_msg);
+        } else {
+            return response;
+        }*/
+
         const model = "gemini-1.5-pro-exp-0827";
         const res = await ai.generate(model, data_msg);
         return jsonFormat(res);
@@ -81,19 +155,21 @@ const connect = async () => {
     const config = JSON.parse(fs.readFileSync("./pairing.json", "utf-8"));
 
     const kyy = makeWaSocket({
-        printQRInTerminal: !config.pairing?.state || !config.pairing.number,
+        printQRInTerminal:
+            config.pairing && config.pairing.state && config.pairing.number
+                ? false
+                : true,
         auth: state,
         browser: ["Chrome (Linux)", "", ""],
         logger: Pino({ level: "silent" })
     });
     simpleBind(kyy);
-
     if (
         config.pairing &&
         config.pairing.state &&
         !kyy.authState.creds.registered
     ) {
-        const phoneNumber = config.pairing.number;
+        var phoneNumber = config.pairing.number;
         if (
             !Object.keys(PHONENUMBER_MCC).some(v =>
                 String(phoneNumber).startsWith(v)
@@ -107,65 +183,62 @@ const connect = async () => {
                 let code = await kyy.requestPairingCode(phoneNumber);
                 code = code?.match(/.{1,4}/g)?.join("-") || code;
                 console.log(colors.yellow("Pairing Code:" + code));
-            } catch (error) {
-                console.error("Error requesting pairing code:", error);
-            }
+            } catch {}
         }, 3000);
     }
-
     kyy.ev.on("creds.update", saveCreds);
     kyy.ev.on("connection.update", async update => {
+        //console.log(update);
         const { connection, lastDisconnect } = update;
         if (connection === "open") {
             console.log(
-                colors.green("Successfully Connected With ") +
-                    colors.cyan(kyy.user.username)
+                colors.green("Succesfully Connected With ") +
+                    colors.cyan(kyy.user.name)
             );
-            kyy.sendMessage(kyy.user.id, { text: "Bot is online!" });
-        } else if (connection === "close") {
-            console.log(
-                colors.red("Connection closed, attempting to reconnect...")
-            );
+        }
+        if (connection === "close") {
             if (
-                lastDisconnect.error &&
-                lastDisconnect.error.output.statusCode !== 401
-            ) {
+                lastDisconnect?.output?.statusCode !==
+                baileys.DisconnectReason.loggedOut
+            )
                 connect();
-            }
         }
     });
-
     kyy.ev.on("messages.upsert", async ({ messages }) => {
-        const message = messages[0];
-        if (!message.key.fromMe && message.message) {
-            const userId = message.key.remoteJid;
-            const userMessage = message.message.extendedTextMessage?.text || '';
+        const m = messages[0];
+        const text =
+            (
+                m.message?.extendedTextMessage?.text ??
+                m.message?.ephemeralMessage?.message?.extendedTextMessage
+                    ?.text ??
+                m.message?.conversation
+            )?.toLowerCase() || "";
 
-            const chat = await getOrCreateChat(userId);
-            const newMessage = {
-                role: "user",
-                content: userMessage,
-                timestamp: new Date()
-            };
-
-            await updateChat(chat, newMessage);
-            const response = await chatWithGPT(chat.conversations);
-
-            const assistantMessage = {
-                role: "assistant",
-                content: response,
-                timestamp: new Date()
-            };
-
-            await updateChat(chat, assistantMessage);
-            await kyy.sendMessage(userId, { text: response });
+        //console.log(text)
+        if (m.key.remoteJid.endsWith("@g.us")) {
+            setTimeout(() => {
+                kyy.groupLeave(m.key.remoteJid);
+            }, 5000);
+        }
+        if (!m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
+            kyy.readMessages([m.key])
+                .then(() => getOrCreateChat(m.key.remoteJid))
+                .then(chat => updateChat(chat, { role: "user", content: text }))
+                .then(() =>
+                    kyy.sendPresenceUpdate("composing", m.key.remoteJid)
+                )
+                .then(() => chatWithGPT(chat.conversations))
+                .then(response => {
+                    kyy.reply(m.key.remoteJid, jsonFormat(response), m).then(
+                        () =>
+                            updateChat(chat, {
+                                role: "assistant",
+                                content: response
+                            })
+                    );
+                });
         }
     });
 };
 
-connect().catch(console.error); // Handle connection errors
-
-process.on("SIGTERM", async () => {
-    await flushMessageBuffer();
-    process.exit(0);
-});
+connect().catch(() => connect());
