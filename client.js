@@ -151,7 +151,7 @@ const connect = async () => {
             };
 
             await updateChat(chat, newMessage);
-            const response = await chatWithGPT(userMessage);
+            const response = await chatWithGPT(chat);
 
             const assistantMessage = {
                 role: "assistant",
