@@ -24,7 +24,6 @@
         "pm2": "latest",
         "qrcode-terminal": "^0.12.0",
         "rootpath": "latest",
-        "unlimited-ai": "latest",
-        "yt-search": "latest"
+        "unlimited-ai": "latest"
     }
 }
