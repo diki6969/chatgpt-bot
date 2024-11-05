@@ -112,14 +112,28 @@ async function connect() {
         }
 
         if (!m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
-            await kyy.readMessages([m.key]);
-            const chat = await getOrCreateChat(m.key.remoteJid);
-            await updateChat(chat, { role: "user", content: text });
-            await kyy.sendPresenceUpdate("composing", m.key.remoteJid);
+            kyy.readMessages([m.key]).then(() => {
+    getOrCreateChat(m.key.remoteJid).then(chat => {
+        updateChat(chat, {
+            role: "user",
+            content: text
+        }).then(() => {
+            kyy.sendPresenceUpdate("composing", m.key.remoteJid).then(() => {
+                chatWithGPT(chat.conversations).then(response => {
+                    kyy.reply(m.key.remoteJid, jsonFormat(response), m).then(
+                        a => {
+                            updateChat(chat, {
+                                role: "assistant",
+                                content: response
+                            });
+                        }
+                    );
+                });
+            });
+        });
+    });
+});
 
-            const response = await chatWithGPT(chat.conversations);
-            await kyy.reply(m.key.remoteJid, jsonFormat(response), m);
-            await updateChat(chat, { role: "assistant", content: response });
         }
     });
 }
