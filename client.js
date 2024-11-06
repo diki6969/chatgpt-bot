@@ -57,7 +57,7 @@ const Api = new ApiFeature();
 
 async function chatWithGPT(data_msg) {
     try {
-        const model = "claude-3-5-sonnet-20240620";
+        const model = "gemini-1.5-pro-exp-0827";
         const res = await ai.generate(model, data_msg);
         return jsonFormat(res);
     } catch (e) {
