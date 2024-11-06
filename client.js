@@ -134,34 +134,36 @@ async function connect() {
         }
 
         if (!m.key.fromMe && !m.key.remoteJid.endsWith("@g.us")) {
-            kyy.readMessages([m.key]).then(() => {
-                getOrCreateChat(m.key.remoteJid).then(chat => {
-                    updateChat(chat, {
-                        role: "user",
-                        content: text
-                    }).then(() => {
-                        kyy.sendPresenceUpdate(
-                            "composing",
-                            m.key.remoteJid
-                        ).then(() => {
-                            chatWithGPT(chat.conversations).then(
-                                response => {
-                                    kyy.reply(
-                                        m.key.remoteJid,
-                                        jsonFormat(response),
-                                        m
-                                    ).then(a => {
-                                        updateChat(chat, {
-                                            role: "assistant",
-                                            content: response
+            if (text !== "") {
+                kyy.readMessages([m.key]).then(() => {
+                    getOrCreateChat(m.key.remoteJid).then(chat => {
+                        updateChat(chat, {
+                            role: "user",
+                            content: text
+                        }).then(() => {
+                            kyy.sendPresenceUpdate(
+                                "composing",
+                                m.key.remoteJid
+                            ).then(() => {
+                                chatWithGPT(chat.conversations).then(
+                                    response => {
+                                        kyy.reply(
+                                            m.key.remoteJid,
+                                            jsonFormat(response),
+                                            m
+                                        ).then(a => {
+                                            updateChat(chat, {
+                                                role: "assistant",
+                                                content: response
+                                            });
                                         });
-                                    });
-                                }
-                            );
+                                    }
+                                );
+                            });
                         });
                     });
                 });
-            });
+            }
         }
     });
 }
