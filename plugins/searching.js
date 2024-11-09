@@ -1,4 +1,4 @@
-let morphic = require("./lib/ai");
+let morphic = require("../lib/ai");
 const Morphic = new morphic();
 module.exports = async (m, out, kyy, a) => {
     let chat = await getOrCreateChat(m.key.remoteJid);
