@@ -125,14 +125,7 @@ class Api_feature {
 }
 
 global.Api = new Api_feature();
-function isJson(str) {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
+
 
 global.chatWithGPT = async data_msg => {
     try {
@@ -152,50 +145,12 @@ global.chatWithGPT = async data_msg => {
 
         const model = "gemini-1.5-pro-exp-0827";
         const res = await ai.generate(model, data_msg);
-        if (!isJson(res)) return chatWithGPT(data_msg);
         return jsonFormat(res);
     } catch (e) {
         console.error(e);
         return chatWithGPT(data_msg);
     }
 };
-global.GptConvert = async msg => {
-    try {
-        const model = "gemini-1.5-pro-exp-0827";
-        let data_msg = [
-          ...defaultSystemMessages,
-            {
-            role: "user",
-            content: `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`
-        }
-          ]
-        const res = await ai.generate(model, data_msg);
-        if (!isJson(res)) return chatWithGPT(msg);
-        return jsonFormat(res.output);
-    } catch (e) {
-        console.error(e);
-        return chatWithGPT(msg);
-    }
-};
-global.GptFailSearch = async msg => {
-    try {
-        const model = "gemini-1.5-pro-exp-0827";
-        let data_msg = [
-          ...defaultSystemMessages,
-            {
-            role: "user",
-            content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet.`
-        }
-          ]
-        const res = await ai.generate(model, data_msg);
-        if (!isJson(res)) return chatWithGPT(msg);
-        return jsonFormat(res.output);
-    } catch (e) {
-        console.error(e);
-        return chatWithGPT(msg);
-    }
-};
-
 const plugins = {};
 
 function loadPlugins() {
