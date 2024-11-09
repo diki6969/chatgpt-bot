@@ -18,7 +18,7 @@ const chatSchema = new mongoose.Schema(
                 },
                 content: {
                     type: String,
-                    required: false
+                    required: true
                 },
                 timestamp: {
                     type: Date,
@@ -127,7 +127,7 @@ async function getOrCreateChat(userId) {
         return chat;
     } catch (error) {
         console.error("Error in getOrCreateChat:", error);
-        // throw error;
+        throw error;
     }
 }
 
