@@ -129,20 +129,6 @@ global.Api = new Api_feature();
 
 global.chatWithGPT = async data_msg => {
     try {
-        /*const bot = await Api.widipe("post/gpt-prompt", {
-            data: { messages: data_msg }
-        });
-        let response = jsonFormat(bot.result);
-        if (response === "undefined") {
-            return chatWithGPT(data_msg);
-        } else if (typeof response === "undefined") {
-            return chatWithGPT(data_msg);
-        } else if (response === undefined) {
-            return chatWithGPT(data_msg);
-        } else {
-            return response;
-        }*/
-
         const model = "gemini-1.5-pro-exp-0827";
         const res = await ai.generate(model, data_msg);
         return jsonFormat(res);
