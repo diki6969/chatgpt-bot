@@ -17,17 +17,7 @@ module.exports = async (m, out, kyy, a) => {
         console.error(e);
     }
     if (!search.status) {
-        let fail = await chatWithGPT([
-            {
-                role: "system",
-                content:
-                    "lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa."
-            },
-            {
-                role: "user",
-                content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet`
-            }
-        ]);
+        let fail = await GptFailSearch();
         kyy.reply(m.key.remoteJid, fail).then(async jb => {
             await updateChat(chat, {
                 role: "assistant",
