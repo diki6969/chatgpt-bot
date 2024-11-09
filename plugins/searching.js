@@ -35,7 +35,7 @@ module.exports = async (m, out, kyy, a) => {
             });
         });
     } else {
-        let convert_msg = await convert(search.result);
+        let convert_msg = await GptConvert(search.result);
         kyy.reply(m.key.remoteJid, convert_msg).then(async y => {
             await updateChat(chat, {
                 role: "assistant",
