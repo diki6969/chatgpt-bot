@@ -170,11 +170,11 @@ global.GptConvert = async msg => {
         }
           ]
         const res = await ai.generate(model, data_msg);
-        if (!isJson(res)) return chatWithGPT(data_msg);
+        if (!isJson(res)) return chatWithGPT(msg);
         return jsonFormat(res.output);
     } catch (e) {
         console.error(e);
-        return chatWithGPT(data_msg);
+        return chatWithGPT(msg);
     }
 };
 global.GptFailSearch = async msg => {
@@ -188,11 +188,11 @@ global.GptFailSearch = async msg => {
         }
           ]
         const res = await ai.generate(model, data_msg);
-        if (!isJson(res)) return chatWithGPT(data_msg);
+        if (!isJson(res)) return chatWithGPT(msg);
         return jsonFormat(res.output);
     } catch (e) {
         console.error(e);
-        return chatWithGPT(data_msg);
+        return chatWithGPT(msg);
     }
 };
 
