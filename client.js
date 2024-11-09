@@ -177,6 +177,24 @@ global.GptConvert = async msg => {
         return chatWithGPT(data_msg);
     }
 };
+global.GptFailSearch = async msg => {
+    try {
+        const model = "gemini-1.5-pro-exp-0827";
+        let data_msg = [
+          ...defaultSystemMessages,
+            {
+            role: "user",
+            content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet.`
+        }
+          ]
+        const res = await ai.generate(model, data_msg);
+        if (!isJson(res)) return chatWithGPT(data_msg);
+        return jsonFormat(res.output);
+    } catch (e) {
+        console.error(e);
+        return chatWithGPT(data_msg);
+    }
+};
 
 const plugins = {};
 
