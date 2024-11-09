@@ -261,25 +261,24 @@ const connect = async () => {
                             ).then(() => {
                                 chatWithGPT(chat.conversations).then(
                                     response => {
-                                        JSON.parse(response).then(out => {
-                                            kyy.reply(
-                                                m.key.remoteJid,
-                                                jsonFormat(out.output),
-                                                m
-                                            ).then(a => {
-                                                updateChat(chat, {
-                                                    role: "assistant",
-                                                    content: response
-                                                }).then(() => {
-                                                    if (plugins[out.type]) {
-                                                        plugins[out.type](
-                                                            m,
-                                                            out,
-                                                            kyy,
-                                                            a
-                                                        );
-                                                    }
-                                                });
+                                        let out = JSON.parse(response);
+                                        kyy.reply(
+                                            m.key.remoteJid,
+                                            jsonFormat(out.output),
+                                            m
+                                        ).then(a => {
+                                            updateChat(chat, {
+                                                role: "assistant",
+                                                content: response
+                                            }).then(() => {
+                                                if (plugins[out.type]) {
+                                                    plugins[out.type](
+                                                        m,
+                                                        out,
+                                                        kyy,
+                                                        a
+                                                    );
+                                                }
                                             });
                                         });
                                     }
