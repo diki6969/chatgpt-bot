@@ -11,9 +11,10 @@ module.exports = async (m, out, kyy, a) => {
         await Morphic.login(process.env.morphic_user, process.env.morphic_pw);
         let res = await Morphic.chat(out.input);
 
-        search.result = res;
-    } catch {
+        search.result = res.answer;
+    } catch (e) {
         search.status = false;
+        console.error(e);
     }
     if (!search.status) {
         let fail = await chatWithGPT([
