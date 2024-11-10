@@ -24,7 +24,7 @@ global.updateChat = updateChat;
 class Api_feature {
     constructor() {
         this.Nazuna = "https://api.nazuna.my.id/api/";
-        this.Widipe = "https://widipe.com/";
+        this.Widipe = "https://aemt.uk.to/";
         this.Itzpire = "https://itzpire.com/";
         //this.apiKey = process.env.API_KEYS;
     }
