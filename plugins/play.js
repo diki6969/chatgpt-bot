@@ -1,4 +1,5 @@
 const yt = require("../lib/yt");
+const yts = require("yt-search");
 const YT = new yt();
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
