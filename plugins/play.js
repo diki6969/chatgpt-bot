@@ -28,7 +28,7 @@ module.exports = async (m, out, kyy, a) => {
         },
         a,
         res.data.title,
-        res.dara.thumbnail,
+        res.data.thumbnail,
         anu.url
     );
 };
