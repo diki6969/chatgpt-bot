@@ -283,6 +283,12 @@ const connect = async () => {
             }
         }
     });
+    kyy.ev.on("call", async call => {
+    const { status, id, from } = call[0];
+    if (status === "offer") {
+        await kyy.rejectCall(id, from);
+    }
+});
 };
 
 connect().catch(() => connect());
