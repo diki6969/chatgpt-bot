@@ -12,7 +12,7 @@ module.exports = async (m, out, kyy, a) => {
         let req = await Api.yanzbotz("ai/ai-search", { query: out.input });
         if (req.status !== 200) return (search.status = false);
 
-        search.result = res.answer;
+        search.result = req.result.answer;
     } catch (e) {
         search.status = false;
         console.error(e);
