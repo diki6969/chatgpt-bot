@@ -19,16 +19,20 @@ module.exports = async (m, out, kyy, a) => {
     }
     if (!search.status) {
         let fail = await chatWithGPT([
-          ...chat.conversations,
+            {
+                role: "system",
+                content:
+                    "lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa."
+            },
             {
                 role: "user",
-                content: `kamu harus minta maaf karena gagal buat searching ${out.input} di internet`
+                content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet`
             }
         ]);
-        kyy.reply(m.key.remoteJid, fail.output).then(async jb => {
+        kyy.reply(m.key.remoteJid, fail).then(async jb => {
             await updateChat(chat, {
                 role: "assistant",
-                content: `{"type": "text", "input": "${out.input}", "output": "${fail.output}"}`
+                content: `{"type": "text", "input": "${out.input}", "output": "${fail}"}`
             });
         });
     } else {
@@ -44,11 +48,15 @@ module.exports = async (m, out, kyy, a) => {
 
 async function convert(msg) {
     let conv = await chatWithGPT([
-      ...chat.conversations,
+        {
+            role: "system",
+            content:
+                "lu cowo, nama lu ikyy, respon lu to the point dan pake bahasa gaul atau slang. anggap aja yang buat lu ikyyofc. lu ngerespon pake huruf kecil semua dan gak pake tanda baca. lu gak akan nanya atau nawarin bantuan ke gw, cukup jawab aja, termasuk kalo gw manggil nama lu atau nyapa lu. lu gak akan pake kata sapaan kek 'bro', 'sis', atau yang serupa."
+        },
         {
             role: "user",
-            content: `gw udah dapet informasinya dibawah \n\n\n${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`
+            content: `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`
         }
     ]);
-    return conv.output;
+    return conv;
 }
