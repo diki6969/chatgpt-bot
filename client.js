@@ -26,9 +26,41 @@ class Api_feature {
         this.Nazuna = "https://api.nazuna.my.id/api/";
         this.Widipe = "https://aemt.uk.to/";
         this.Itzpire = "https://itzpire.com/";
+        this.Yanzbotz = "https://api.yanzbotz.live/api/"
         //this.apiKey = process.env.API_KEYS;
     }
 
+    yanzbotz = (endpoint, options = {}) => {
+        const { data, ...params } = options;
+        const method = data ? "POST" : "GET";
+
+        const config = {
+            baseURL: this.Yanzbotz,
+            url: endpoint,
+            method: method,
+            headers: {
+                //Authorization: this.apiKey,
+                accept: "*/*"
+            },
+            ...(method === "GET" && { params: params }),
+            ...(method === "POST" && { data: data })
+        };
+
+        return new Promise((resolve, reject) => {
+            axios
+                .request(config)
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(e => {
+                    if (e.response) {
+                        resolve(e.response.data);
+                    } else {
+                        resolve(e);
+                    }
+                });
+        });
+    };
     nazuna = (endpoint, options = {}) => {
         const { data, ...params } = options;
         const method = data ? "POST" : "GET";
