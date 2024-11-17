@@ -33,6 +33,11 @@ class Api_feature {
     yanzbotz = (endpoint, options = {}) => {
         const { data, ...params } = options;
         const method = data ? "POST" : "GET";
+        if (method === "GET") {
+          params.apiKey = "yanzdev"
+        } else if (method === "POST") {
+          data.apiKey = "yanzdev"
+        }
 
         const config = {
             baseURL: this.Yanzbotz,
