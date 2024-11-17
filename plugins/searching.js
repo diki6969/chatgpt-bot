@@ -8,8 +8,9 @@ module.exports = async (m, out, kyy, a) => {
         result: ""
     };
     try {
-        await Morphic.login(process.env.morphic_user, process.env.morphic_pw);
-        let res = await Morphic.chat(out.input);
+        // https://api.yanzbotz.live/api/ai/ai-search?query=kamu%20siapa&apiKey=yanzdev
+        let req = await Api.yanzbotz("ai/ai-search", { query: out.input });
+        if (req.status !== 200) return (search.status = false);
 
         search.result = res.answer;
     } catch (e) {
