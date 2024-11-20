@@ -19,6 +19,7 @@ const {
     updateAllChatsSystemMessages
 } = require("./database");
 const { jsonFormat, simpleBind } = require("./lib/simple");
+const gemini = require("./lib/gemini");
 global.getOrCreateChat = getOrCreateChat;
 global.updateChat = updateChat;
 class Api_feature {
@@ -26,7 +27,7 @@ class Api_feature {
         this.Nazuna = "https://api.nazuna.my.id/api/";
         this.Widipe = "https://aemt.uk.to/";
         this.Itzpire = "https://itzpire.com/";
-        this.Yanzbotz = "https://api.yanzbotz.live/api/"
+        this.Yanzbotz = "https://api.yanzbotz.live/api/";
         //this.apiKey = process.env.API_KEYS;
     }
 
@@ -34,9 +35,9 @@ class Api_feature {
         const { data, ...params } = options;
         const method = data ? "POST" : "GET";
         if (method === "GET") {
-          params.apiKey = "yanzdev"
+            params.apiKey = "yanzdev";
         } else if (method === "POST") {
-          data.apiKey = "yanzdev"
+            data.apiKey = "yanzdev";
         }
 
         const config = {
@@ -165,8 +166,9 @@ global.Api = new Api_feature();
 
 global.chatWithGPT = async data_msg => {
     try {
-        const model = "gemini-1.5-pro-exp-0827";
-        const res = await ai.generate(model, data_msg);
+        const arrayMsg = data_msg[data_msg.length - 1];
+        const newMsg = arrayMsg.content;
+        const res = await gemini(data_msg, newMsg);
         return jsonFormat(res);
     } catch (e) {
         console.error(e);
@@ -321,14 +323,14 @@ const connect = async () => {
         }
     });
     kyy.ev.on("call", async call => {
-    const { status, id, from } = call[0];
-    if (status === "offer") {
-        await kyy.rejectCall(id, from);
-        await kyy.sendMessage(from, {
-          text: "gausah call, nanti di blok sama bot"
-        })
-    }
-});
+        const { status, id, from } = call[0];
+        if (status === "offer") {
+            await kyy.rejectCall(id, from);
+            await kyy.sendMessage(from, {
+                text: "gausah call, nanti di blok sama bot"
+            });
+        }
+    });
 };
 
 connect().catch(() => connect());
