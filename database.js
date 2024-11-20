@@ -38,7 +38,7 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.pre("save", function (next) {
-    if (this.conversations.filter(msg => msg.role !== "system").length > 65) {
+    if (this.conversations.filter(msg => msg.role !== "system").length > 20) {
         const systemMessages = this.conversations.filter(
             msg => msg.role === "system"
         );
