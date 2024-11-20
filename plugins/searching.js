@@ -28,7 +28,7 @@ module.exports = async (m, out, kyy, a) => {
                 role: "user",
                 content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet`
             }
-        ]);
+        ], "buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet");
         kyy.reply(m.key.remoteJid, fail).then(async jb => {
             await updateChat(chat, {
                 role: "assistant",
@@ -57,6 +57,6 @@ async function convert(msg) {
             role: "user",
             content: `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`
         }
-    ]);
+    ], `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`);
     return conv;
 }
