@@ -164,10 +164,8 @@ class Api_feature {
 
 global.Api = new Api_feature();
 
-global.chatWithGPT = async data_msg => {
+global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        const arrayMsg = data_msg[data_msg.length - 1];
-        const newMsg = arrayMsg.content;
         const res = await gemini(data_msg, newMsg);
         return jsonFormat(res.reply);
     } catch (e) {
@@ -178,17 +176,17 @@ global.chatWithGPT = async data_msg => {
             });
             let response = jsonFormat(bot.result);
             if (response === "undefined") {
-                return chatWithGPT(data_msg);
+                return chatWithGPT(data_msg, newMsg);
             } else if (typeof response === "undefined") {
-                return chatWithGPT(data_msg);
+                return chatWithGPT(data_msg, newMsg);
             } else if (response === undefined) {
-                return chatWithGPT(data_msg);
+                return chatWithGPT(data_msg, newMsg);
             } else {
                 return response;
             }
         } catch (er) {
             console.error(er);
-            return chatWithGPT(data_msg);
+            return chatWithGPT(data_msg, newMsg);
         }
     }
 };
