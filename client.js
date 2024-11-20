@@ -169,7 +169,7 @@ global.chatWithGPT = async data_msg => {
         const arrayMsg = data_msg[data_msg.length - 1];
         const newMsg = arrayMsg.content;
         const res = await gemini(data_msg, newMsg);
-        return jsonFormat(res);
+        return jsonFormat(res.reply);
     } catch (e) {
         console.error(e);
         try {
