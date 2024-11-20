@@ -289,7 +289,7 @@ const connect = async () => {
                                 "composing",
                                 m.key.remoteJid
                             ).then(() => {
-                                chatWithGPT(chat.conversations).then(
+                                chatWithGPT(chat.conversations, text).then(
                                     response => {
                                         let out = JSON.parse(response);
                                         kyy.reply(
