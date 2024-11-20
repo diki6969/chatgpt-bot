@@ -167,7 +167,7 @@ global.Api = new Api_feature();
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
         const res = await gemini(data_msg, newMsg);
-        return jsonFormat(res.reply);
+        return jsonFormat(res.reply.reply);
     } catch (e) {
         console.error(e);
         try {
