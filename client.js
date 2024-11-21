@@ -166,28 +166,22 @@ global.Api = new Api_feature();
 
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        const res = await gemini(data_msg, newMsg);
-        return jsonFormat(res.reply.reply);
-    } catch (e) {
-        console.error(e);
-        try {
-            const bot = await Api.widipe("post/gpt-prompt", {
-                data: { messages: data_msg }
-            });
-            let response = jsonFormat(bot.result);
-            if (response === "undefined") {
-                return chatWithGPT(data_msg, newMsg);
-            } else if (typeof response === "undefined") {
-                return chatWithGPT(data_msg, newMsg);
-            } else if (response === undefined) {
-                return chatWithGPT(data_msg, newMsg);
-            } else {
-                return response;
-            }
-        } catch (er) {
-            console.error(er);
+        const bot = await Api.widipe("post/gpt-prompt", {
+            data: { messages: data_msg }
+        });
+        let response = jsonFormat(bot.result);
+        if (response === "undefined") {
             return chatWithGPT(data_msg, newMsg);
+        } else if (typeof response === "undefined") {
+            return chatWithGPT(data_msg, newMsg);
+        } else if (response === undefined) {
+            return chatWithGPT(data_msg, newMsg);
+        } else {
+            return response;
         }
+    } catch (er) {
+        console.error(er);
+        return chatWithGPT(data_msg, newMsg);
     }
 };
 const plugins = {};
