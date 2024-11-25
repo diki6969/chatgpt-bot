@@ -393,8 +393,8 @@ const connect = async () => {
                         "coba lu pura pura menyapa seseorang terus nanya namanya"
                 }
             ]);
-            const res = JSON.parse(chat_first).output;
-            kyy.reply(no_final, res).then(async j => {
+            const res = JSON.parse(chat_first);
+            kyy.reply(no_final, res.output).then(async j => {
                 updateChat(chat, {
                     role: "assistant",
                     content: chat_first
