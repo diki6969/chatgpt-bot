@@ -166,22 +166,32 @@ global.Api = new Api_feature();
 
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        const bot = await Api.widipe("post/gpt-prompt", {
-            data: { messages: data_msg }
-        });
-        let response = jsonFormat(bot.result);
-        if (response === "undefined") {
+        const model = "gemini-1.5-flash-exp-0827";
+        const bot = await ai.generate(model, data_msg);
+        let response = jsonFormat(bot);
+        if (!/\"output\"\:/g.test(response) || !/output\:/g.test(response))
+            return chatWithGPT(data_msg);
+        return response;
+    } catch (e) {
+      console.log(e);
+        try {
+            const bot = await Api.widipe("post/gpt-prompt", {
+                data: { messages: data_msg }
+            });
+            let response = jsonFormat(bot.result);
+            if (response === "undefined") {
+                return chatWithGPT(data_msg, newMsg);
+            } else if (typeof response === "undefined") {
+                return chatWithGPT(data_msg, newMsg);
+            } else if (response === undefined) {
+                return chatWithGPT(data_msg, newMsg);
+            } else {
+                return response;
+            }
+        } catch (er) {
+            console.error(er);
             return chatWithGPT(data_msg, newMsg);
-        } else if (typeof response === "undefined") {
-            return chatWithGPT(data_msg, newMsg);
-        } else if (response === undefined) {
-            return chatWithGPT(data_msg, newMsg);
-        } else {
-            return response;
         }
-    } catch (er) {
-        console.error(er);
-        return chatWithGPT(data_msg, newMsg);
     }
 };
 const plugins = {};
