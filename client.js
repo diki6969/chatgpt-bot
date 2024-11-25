@@ -173,7 +173,7 @@ global.chatWithGPT = async (data_msg, newMsg) => {
         );
 
         const model = "claude-3-5-sonnet-20240620";
-        const bot = await ai.generate(model, data_msg);
+        const bot = await ai.generate(model, msg);
         let response = jsonFormat(bot);
         if (!/\"output\"\:/g.test(response) || !/output\:/g.test(response))
             return chatWithGPT(data_msg);
