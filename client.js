@@ -173,7 +173,7 @@ global.chatWithGPT = async (data_msg, newMsg) => {
             return chatWithGPT(data_msg);
         return response;
     } catch (e) {
-      console.log(e);
+      console.error(e);
         try {
             const bot = await Api.widipe("post/gpt-prompt", {
                 data: { messages: data_msg }
