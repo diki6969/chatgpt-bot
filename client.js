@@ -199,8 +199,8 @@ global.Api = new Api_feature();
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
         const bot = await Api.ikyy("gemini", { data: { messages: data_msg } });
-        let response = jsonFormat(bot);
-        return response;
+        let response = jsonFormat(bot.result);
+        return response.;
     } catch (e) {
         console.error(e);
         try {
