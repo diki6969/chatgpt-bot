@@ -379,7 +379,7 @@ const connect = async () => {
                 );
                 let no_result = `${countryCode}${randomPrefix}${randomNumber}`;
 
-                let wa = await conn.onWhatsApp(no_result);
+                let wa = await kyy.onWhatsApp(no_result);
                 if (!wa.length) return generateRandomPhoneNumber();
                 return wa[0].jid;
             }
