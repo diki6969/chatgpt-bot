@@ -166,14 +166,20 @@ global.Api = new Api_feature();
 
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        const model = "gemini-1.5-flash-exp-0827";
+        let arr = data_msg;
+
+        let msg = arr.map(obj =>
+            obj.role === "system" ? { ...obj, role: "user" } : obj
+        );
+
+        const model = "claude-3-5-sonnet-20240620";
         const bot = await ai.generate(model, data_msg);
         let response = jsonFormat(bot);
         if (!/\"output\"\:/g.test(response) || !/output\:/g.test(response))
             return chatWithGPT(data_msg);
         return response;
     } catch (e) {
-      console.error(e);
+        console.error(e);
         try {
             const bot = await Api.widipe("post/gpt-prompt", {
                 data: { messages: data_msg }
