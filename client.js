@@ -28,6 +28,7 @@ class Api_feature {
         this.Widipe = "https://aemt.uk.to/";
         this.Itzpire = "https://itzpire.com/";
         this.Yanzbotz = "https://api.yanzbotz.live/api/";
+        this.Ikyy = "https://ikyy-bard.hf.space/";
         //this.apiKey = process.env.API_KEYS;
     }
 
@@ -129,6 +130,37 @@ class Api_feature {
                 });
         });
     };
+    ikyy = (endpoint, options = {}) => {
+        const { data, ...params } = options;
+        const method = data ? "POST" : "GET";
+
+        const config = {
+            baseURL: this.Ikyy,
+            url: endpoint,
+            method: method,
+            headers: {
+                //Authorization: this.apiKey,
+                accept: "*/*"
+            },
+            ...(method === "GET" && { params: params }),
+            ...(method === "POST" && { data: data })
+        };
+
+        return new Promise((resolve, reject) => {
+            axios
+                .request(config)
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(e => {
+                    if (e.response) {
+                        resolve(e.response.data);
+                    } else {
+                        resolve(e);
+                    }
+                });
+        });
+    };
     itzpire = (endpoint, options = {}) => {
         const { data, ...params } = options;
         const method = data ? "POST" : "GET";
@@ -166,17 +198,8 @@ global.Api = new Api_feature();
 
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        let arr = data_msg;
-
-        let msg = arr.map(obj =>
-            obj.role === "system" ? { ...obj, role: "user" } : obj
-        );
-
-        const model = "claude-3-5-sonnet-20240620";
-        const bot = await ai.generate(model, msg);
+        const bot = await Api.ikyy("gemini", { data: { messages: data_msg } });
         let response = jsonFormat(bot);
-        if (!/\"output\"\:/g.test(response) || !/output\:/g.test(response))
-            return chatWithGPT(data_msg);
         return response;
     } catch (e) {
         console.error(e);
