@@ -408,7 +408,7 @@ const connect = async () => {
         if (status === "offer") {
             await kyy.rejectCall(id, from);
             await kyy.sendMessage(from, {
-                text: "gausah call, nanti di blok sama bot"
+                text: "gausah call, nanti gw blok"
             });
         }
     });
