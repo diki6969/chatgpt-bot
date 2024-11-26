@@ -15,7 +15,7 @@ const Pino = require("pino"),
 const {
     connectDB,
     getOrCreateChat,
-    updateChat,
+    updateChat
     //updateAllChatsSystemMessages
 } = require("./database");
 const { jsonFormat, simpleBind } = require("./lib/simple");
@@ -199,7 +199,7 @@ global.Api = new Api_feature();
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
         const bot = await Api.widipe("post/gpt-prompt", {
-            data: { messages: data_msg }
+            data: { messages: [...defaultSystemMessages, ...data_msg] }
         });
         let response = jsonFormat(bot.result);
         if (response === "undefined") {
@@ -232,7 +232,7 @@ function loadPlugins() {
 loadPlugins();
 const connect = async () => {
     await connectDB();
-   // await updateAllChatsSystemMessages();
+    // await updateAllChatsSystemMessages();
     console.log(colors.green("Connecting..."));
     const { state, saveCreds } = await useMultiFileAuthState("session");
     const config = JSON.parse(fs.readFileSync("./pairing.json", "utf-8"));
