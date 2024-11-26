@@ -38,13 +38,13 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.pre("save", function (next) {
-    if (this.conversations.filter(msg => msg.role !== "system").length > 21) {
+    if (this.conversations.filter(msg => msg.role !== "system").length > 20) {
         const systemMessages = this.conversations.filter(
             msg => msg.role === "system"
         );
         const recentMessages = this.conversations
             .filter(msg => msg.role !== "system")
-            .slice(-20);
+            .slice(-19);
         this.conversations = [...systemMessages, ...recentMessages];
     }
     next();
