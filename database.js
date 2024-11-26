@@ -14,7 +14,7 @@ const chatSchema = new mongoose.Schema(
                 role: {
                     type: String,
                     required: true,
-                    enum: ["system", "user", "assistant"]
+                    enum: ["user", "assistant"]
                 },
                 content: {
                     type: String,
@@ -105,23 +105,12 @@ async function getOrCreateChat(userId) {
         if (!chat) {
             chat = new Chat({
                 userId,
-                conversations: [...defaultSystemMessages]
+                conversations: []
             });
             await chat.save();
         } else {
-            const currentSystemMessages = chat.conversations.filter(
-                msg => msg.role === "system"
-            );
-            if (
-                JSON.stringify(currentSystemMessages) !==
-                JSON.stringify(defaultSystemMessages)
-            ) {
-                chat.conversations = [
-                    ...defaultSystemMessages,
-                    ...chat.conversations.filter(msg => msg.role !== "system")
-                ];
-                await chat.save();
-            }
+            chat.conversations = [...chat.conversations];
+            await chat.save();
         }
 
         return chat;
@@ -164,6 +153,6 @@ module.exports = {
     connectDB,
     Chat,
     getOrCreateChat,
-    updateChat,
-   // updateAllChatsSystemMessages
+    updateChat
+    // updateAllChatsSystemMessages
 };
