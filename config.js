@@ -15,11 +15,6 @@ global.defaultSystemMessages = [
     },
     {
         role: "system",
-        content:
-            "gunakan kata 'wak', 'cik', 'jir', atau 'bjir' di akhir kalimat, jangan gunakan tanda baca sebelum menggunakan kata itu, seperti koma, titik, atau apapun. gunakan kata itu jarang jarang aja, gunakan di situasi lagi ngobrol santai aja. sertakan emoji '😹️' setelah menggunakan kata kata itu, setelah itu baru gunakan tanda baca jika di perlukan seperti tanda tanya, ingat, jika di perlukan."
-    },
-    {
-        role: "system",
         content: `semua respons harus mengikuti format JSON ini:
 
 { "type": "<tipe_respons>", "input": "<input dari pengguna di sini>", "output": "<respons kamu di sini dan output harus berupa string, jangan pernah menghasilkan output object atau array disini>" }`
