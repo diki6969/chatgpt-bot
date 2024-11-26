@@ -16,7 +16,7 @@ const {
     connectDB,
     getOrCreateChat,
     updateChat,
-    updateAllChatsSystemMessages
+    //updateAllChatsSystemMessages
 } = require("./database");
 const { jsonFormat, simpleBind } = require("./lib/simple");
 const gemini = require("./lib/gemini");
@@ -232,7 +232,7 @@ function loadPlugins() {
 loadPlugins();
 const connect = async () => {
     await connectDB();
-    await updateAllChatsSystemMessages();
+   // await updateAllChatsSystemMessages();
     console.log(colors.green("Connecting..."));
     const { state, saveCreds } = await useMultiFileAuthState("session");
     const config = JSON.parse(fs.readFileSync("./pairing.json", "utf-8"));
