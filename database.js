@@ -38,14 +38,9 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.pre("save", function (next) {
-    if (this.conversations.filter(msg => msg.role !== "system").length > 20) {
-        const systemMessages = this.conversations.filter(
-            msg => msg.role === "system"
-        );
-        const recentMessages = this.conversations
-            .filter(msg => msg.role !== "system")
-            .slice(-19);
-        this.conversations = [...systemMessages, ...recentMessages];
+    if (this.conversations.length > 20) {
+        const recentMessages = this.conversations.slice(-19);
+        this.conversations = [...recentMessages];
     }
     next();
 });
