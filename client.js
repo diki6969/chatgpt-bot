@@ -25,7 +25,7 @@ global.updateChat = updateChat;
 class Api_feature {
     constructor() {
         this.Nazuna = "https://api.nazuna.my.id/api/";
-        this.Widipe = "https://aemt.uk.to/";
+        this.Widipe = "https://api.tioo.eu.org/";
         this.Itzpire = "https://itzpire.com/";
         this.Yanzbotz = "https://api.yanzbotz.live/api/";
         this.Ikyy = "https://ikyy-bard.hf.space/";
