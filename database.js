@@ -78,7 +78,7 @@ mongoose.connection.on("error", err => {
     console.error("MongoDB connection error:", err);
 });
 
-async function updateAllChatsSystemMessages() {
+/*async function updateAllChatsSystemMessages() {
     try {
         const chats = await Chat.find({});
 
@@ -96,7 +96,7 @@ async function updateAllChatsSystemMessages() {
     } catch (error) {
         console.error("Error updating system messages:", error);
     }
-}
+}*/
 
 async function getOrCreateChat(userId) {
     try {
@@ -165,5 +165,5 @@ module.exports = {
     Chat,
     getOrCreateChat,
     updateChat,
-    updateAllChatsSystemMessages
+   // updateAllChatsSystemMessages
 };
