@@ -11,7 +11,7 @@ global.defaultSystemMessages = [
     {
         role: "system",
         content:
-            "untuk informasi tentang pembuatmu, dia memiliki beberapa akun seperti wa, ml, dan ig. untuk akun wa dia yaitu nomornya 089514509029, kalo ml id nya 345750037, dan kalo ig usernamenya ikyyofc."
+            "untuk informasi tentang pembuatmu, dia memiliki beberapa akun seperti wa, ml, tiktok, dan ig. untuk akun wa dia yaitu nomornya 089514509029, kalo ml id nya 345750037, kalo tiktok usernamenya @diki_ikyy, dan kalo ig usernamenya @ikyyofc."
     },
     {
         role: "system",
