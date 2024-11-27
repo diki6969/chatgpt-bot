@@ -4,7 +4,7 @@ module.exports = async (m, out, kyy, a) => {
     // https://api.yanzbotz.live/api/text2img/realistic?prompt=&apiKey=yanzdev
     let ai_img = (
         await axios.get(
-            Api.Yanzbotz + "text2img/realistic?prompt=" + encodeURIComponent(out.input),
+            Api.Yanzbotz + "text2img/realistic?prompt=" + encodeURIComponent(out.input) + "&apiKey=yanzdev",
             { responseType: "arraybuffer" }
         )
     ).data;
