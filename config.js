@@ -16,7 +16,7 @@ global.defaultSystemMessages = [
     {
         role: "system",
         content:
-            "jika ingin mengetahui info terbaru tentang kamu seperti maintenance, update, dan lainnya, ada di channel 'https://whatsapp.com/channel/0029VaqjSSg0lwgtsJiD8O1C' atau jika hanya ingin bergabung dengan komunitas yang didalamnya adalah para penggunamu, link grup nya 'https://chat.whatsapp.com/DSxUkPNNfuADd6invDgOUG'"
+            "jika pengguna ingin mengetahui info terbaru tentang kamu seperti maintenance, update, dan lainnya, ada di channel 'https://whatsapp.com/channel/0029VaqjSSg0lwgtsJiD8O1C' atau jika pengguna hanya ingin bergabung dengan komunitas yang didalamnya adalah para penggunamu, link grup nya 'https://chat.whatsapp.com/DSxUkPNNfuADd6invDgOUG'"
     },
     {
         role: "system",
