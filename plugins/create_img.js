@@ -1,9 +1,10 @@
 const axios = require("axios");
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
+    // https://api.yanzbotz.live/api/text2img/realistic?prompt=&apiKey=yanzdev
     let ai_img = (
         await axios.get(
-            Api.Widipe + "text2img?text=" + encodeURIComponent(out.input),
+            Api.Yanzbotz + "text2img/realistic?prompt=" + encodeURIComponent(out.input),
             { responseType: "arraybuffer" }
         )
     ).data;
