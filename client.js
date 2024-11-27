@@ -426,7 +426,7 @@ const connect = async () => {
                         "coba lu pura pura menyapa seseorang terus nanya namanya"
                 }
             ]);
-            const res = JSON.parse(chat_first);
+            const res = chat_first;
             kyy.reply(no_final, res.output).then(async j => {
                 updateChat(chat, {
                     role: "assistant",
@@ -434,7 +434,7 @@ const connect = async () => {
                 });
             });
         },
-        1000 * 60 * 5
+        1000 * 60 * 30
     );
     kyy.ev.on("call", async call => {
         const { status, id, from } = call[0];
