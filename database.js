@@ -38,8 +38,8 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.pre("save", function (next) {
-    if (this.conversations.length > 71) {
-        const recentMessages = this.conversations.slice(-70);
+    if (this.conversations.length > 65) {
+        const recentMessages = this.conversations.slice(-64);
         this.conversations = [...recentMessages];
     }
     next();
