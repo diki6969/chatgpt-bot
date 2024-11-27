@@ -209,7 +209,7 @@ global.chatWithGPT = async (data_msg, newMsg) => {
         } else if (response === undefined) {
             return chatWithGPT(data_msg, newMsg);
         } else {
-            return response;
+            return JSON.parse(response);
         }
     } catch (er) {
         console.error(er);
