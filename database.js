@@ -17,7 +17,7 @@ const chatSchema = new mongoose.Schema(
                     enum: ["user", "assistant"]
                 },
                 content: {
-                    type: String,
+                    type: mongoose.Schema.Types.Mixed,
                     required: true
                 },
                 timestamp: {
