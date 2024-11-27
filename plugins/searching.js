@@ -29,10 +29,10 @@ module.exports = async (m, out, kyy, a) => {
                 content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet`
             }
         ], "buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet");
-        kyy.reply(m.key.remoteJid, fail).then(async jb => {
+        kyy.reply(m.key.remoteJid, fail.output).then(async jb => {
             await updateChat(chat, {
                 role: "assistant",
-                content: `{"type": "text", "input": "${out.input}", "output": "${fail}"}`
+                content: `{"type": "text", "input": "${out.input}", "output": "${fail.output}"}`
             });
         });
     } else {
@@ -40,7 +40,7 @@ module.exports = async (m, out, kyy, a) => {
         kyy.reply(m.key.remoteJid, convert_msg).then(async y => {
             await updateChat(chat, {
                 role: "assistant",
-                content: `{"type": "text", "input": "${out.input}", "output": "${convert_msg}"}`
+                content: `{"type": "text", "input": "${out.input}", "output": "${convert_msg.output}"}`
             });
         });
     }
