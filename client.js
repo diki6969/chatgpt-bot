@@ -209,7 +209,8 @@ global.chatWithGPT = async (data_msg, newMsg) => {
         } else if (response === undefined) {
             return chatWithGPT(data_msg, newMsg);
         } else {
-            return response;
+            let json_res = JSON.parse(response);
+            return json_res;
         }
     } catch (er) {
         console.error(er);
@@ -317,7 +318,7 @@ const connect = async () => {
                             ).then(() => {
                                 chatWithGPT(chat.conversations, text).then(
                                     response => {
-                                        let out = JSON.parse(response);
+                                        let out = response;
                                         kyy.reply(
                                             m.key.remoteJid,
                                             jsonFormat(out.output),
