@@ -37,10 +37,10 @@ module.exports = async (m, out, kyy, a) => {
         });
     } else {
         let convert_msg = await convert(search.result);
-        kyy.reply(m.key.remoteJid, convert_msg).then(async y => {
+        kyy.reply(m.key.remoteJid, convert_msg.output !== "" ? convert_msg.output : convert_msg.input).then(async y => {
             await updateChat(chat, {
                 role: "assistant",
-                content: `{"type": "text", "input": "${out.input}", "output": "${convert_msg.output}"}`
+                content: `{"type": "text", "input": "${out.input}", "output": "${convert_msg.output !== "" ? convert_msg.output : convert_msg.input}"}`
             });
         });
     }
