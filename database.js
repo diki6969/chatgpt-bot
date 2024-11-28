@@ -17,7 +17,7 @@ const chatSchema = new mongoose.Schema(
                     enum: ["user", "assistant"]
                 },
                 content: {
-                    type: mongoose.Schema.Types.Mixed,
+                    type: String,
                     required: true
                 },
                 timestamp: {
@@ -38,8 +38,8 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.pre("save", function (next) {
-    if (this.conversations.length > 65) {
-        const recentMessages = this.conversations.slice(-64);
+    if (this.conversations.length > 71) {
+        const recentMessages = this.conversations.slice(-70);
         this.conversations = [...recentMessages];
     }
     next();
