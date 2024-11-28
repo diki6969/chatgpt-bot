@@ -45,8 +45,8 @@ async function convert(msg) {
     let conv = await chatWithGPT([
         {
             role: "user",
-            content: `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`
+            content: `${msg}\n\n\n\nlu jelasin ulang teks diatas, biar mudah dipahami versi lu yang ngejelasin.`
         }
-    ], `${msg}\n\n\n\nlu kirim ulang teks diatas seolah-olah lu yang kirim teks itu, jadi gaya bahasa atau ketikannya mirip kek lu, dan yang paling penting dan paling utama, gak usah pake emot atau emoji.`);
+    ], `${msg}\n\n\n\nlu jelasin ulang teks diatas, biar mudah dipahami versi lu yang ngejelasin.`);
     return conv;
 }
