@@ -18,12 +18,12 @@ module.exports = async (m, out, kyy, a) => {
         console.error(e);
     }
     if (!search.status) {
-        let fail = await chatWithGPT([
+        let fail = JSON.parse(await chatWithGPT([
             {
                 role: "user",
                 content: `buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet`
             }
-        ], "buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet");
+        ], "buatin kata kata permintaan maaf karena gagal dalam melakukan pencarian di internet"));
         kyy.reply(m.key.remoteJid, fail.output).then(async jb => {
             await updateChat(chat, {
                 role: "assistant",
@@ -31,7 +31,7 @@ module.exports = async (m, out, kyy, a) => {
             });
         });
     } else {
-        let convert_msg = await convert(search.result);
+        let convert_msg = JSON.parse(await convert(search.result));
         kyy.reply(m.key.remoteJid, convert_msg.output !== "" ? convert_msg.output : convert_msg.input).then(async y => {
             await updateChat(chat, {
                 role: "assistant",
