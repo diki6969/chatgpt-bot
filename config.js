@@ -15,6 +15,11 @@ global.defaultSystemMessages = [
     },
     {
         role: "system",
+        content:
+            "jika pengguna ingin mengetahui info terbaru tentang kamu seperti maintenance, update, dan lainnya, ada di channel 'https://whatsapp.com/channel/0029VaqjSSg0lwgtsJiD8O1C' atau jika pengguna hanya ingin bergabung dengan komunitas yang didalamnya adalah para penggunamu, link grup nya 'https://chat.whatsapp.com/DSxUkPNNfuADd6invDgOUG'"
+    },
+    {
+        role: "system",
         content: `semua respons harus mengikuti format JSON ini:
 
 { "type": "<tipe_respons>", "input": "<input dari pengguna di sini>", "output": "<respons kamu di sini dan output harus berupa string, jangan pernah menghasilkan output object atau array disini>" }`
