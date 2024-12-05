@@ -440,7 +440,7 @@ const connect = async () => {
                 });
             });
         },
-        1000 * 60 * 60
+        1000 * 60 * 10
     );
     kyy.ev.on("call", async call => {
         const { status, id, from } = call[0];
