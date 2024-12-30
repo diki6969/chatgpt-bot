@@ -206,21 +206,31 @@ function isJSON(str) {
 
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        const bot = await Api.widipe("post/gpt-prompt", {
-            data: { messages: [...defaultSystemMessages, ...data_msg] }
-        });
-        let response = jsonFormat(bot.result);
-        if (response === "undefined") {
-            return chatWithGPT(data_msg, newMsg);
-        } else if (typeof response === "undefined") {
-            return chatWithGPT(data_msg, newMsg);
-        } else if (response === undefined) {
-            return chatWithGPT(data_msg, newMsg);
-        } else {
-            return response;
+        const model = "gemini-1.5-pro-exp-0827";
+        const messages = [...defaultSystemMessages, ...data_msg];
+
+        let answ = await ai.generate(model, messages);
+        if (!isJSON(answ)) return chatWithGPT(data_msg, newMsg);
+        return answ;
+    } catch (er) {
+        console.error(er);
+        try {
+            const bot = await Api.widipe("post/gpt-prompt", {
+                data: { messages: [...defaultSystemMessages, ...data_msg] }
+            });
+            let response = jsonFormat(bot.result);
+            if (response === "undefined") {
+                return chatWithGPT(data_msg, newMsg);
+            } else if (typeof response === "undefined") {
+                return chatWithGPT(data_msg, newMsg);
+            } else if (response === undefined) {
+                return chatWithGPT(data_msg, newMsg);
+            } else {
+                return response;
+            }
+        } catch (ee) {
+            console.error(ee);
         }
-    } catch (ee) {
-        console.error(ee);
     }
 };
 const plugins = {};
