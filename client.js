@@ -206,7 +206,7 @@ function isJSON(str) {
 
 global.chatWithGPT = async (data_msg, newMsg) => {
     try {
-        const model = "gemini-1.5-flash-exp-0827";
+        const model = "claude-3-5-sonnet-20241022-t";
         const messages = [...defaultSystemMessages, ...data_msg];
 
         let answ = await ai.generate(model, messages);
