@@ -9,8 +9,8 @@ module.exports = async (m, out, kyy, a) => {
     };
     try {
         // https://api.yanzbotz.live/api/ai/ai-search?query=kamu%20siapa&apiKey=yanzdev
-        let req = await Api.yanzbotz("ai/ai-search", { query: out.input });
-        if (req.status !== 200) return (search.status = false);
+        let req = await Api.widipe("feloai", { text: out.input });
+        if (!req.status) return (search.status = false);
 
         search.result = req.result.answer;
     } catch (e) {
