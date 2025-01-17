@@ -1,12 +1,52 @@
-const yt = require("../lib/yt");
 const yts = require("yt-search");
-const YT = new yt();
+async function yt_mp3(url) {
+    const BASE_URL = "https://api.fabdl.com";
+
+    try {
+        const response1 = await fetch(
+            `https://dl.ytmp3.ink/youtube/get?url=${url}`
+        );
+        if (!response1.ok) {
+            return {
+                status: false,
+                message: "Gagal mendapatkan data awal dari API."
+            };
+        }
+
+        const data1 = await response1.json();
+        if (data1.error) {
+            return { status: false, message: "Error dari API: " + data1.error };
+        }
+
+        const response2 = await fetch(data1.result.mp3_task_url);
+        if (!response2.ok) {
+            return { status: false, message: "Gagal mendapatkan URL unduhan." };
+        }
+
+        const data2 = await response2.json();
+        if (!data2.result || !data2.result.download_url) {
+            return { status: false, message: "Data tidak lengkap dari API." };
+        }
+
+        const result_url = BASE_URL + data2.result.download_url;
+
+        return {
+            status: true,
+            url: result_url
+        };
+    } catch (error) {
+        return {
+            status: false,
+            message: "Terjadi kesalahan: " + error.message
+        };
+    }
+};
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
     let search = await yts(out.input);
     let f = search.all.filter(v => !v.url.includes("@"));
     let anu = f[0];
-    const res = await YT.getResult(anu.url, "mp3");
+    const res = await yt_mp3(anu.url);
     if (!res.status) {
         let chat = await getOrCreateChat(m.key.remoteJid);
         await updateChat(chat, {
@@ -23,13 +63,13 @@ module.exports = async (m, out, kyy, a) => {
     await kyy.sendAudio(
         m.key.remoteJid,
         {
-            audio: { url: res.data.media.url },
+            audio: { url: res.url },
             mimetype: "audio/mpeg",
-            fileName: `${res.data.title}.mp3`
+            fileName: `${anu.title}.mp3`
         },
         a,
-        res.data.title,
-        res.data.thumbnail,
+        anu.title,
+        anu.thumbnail,
         anu.url
     );
 };
