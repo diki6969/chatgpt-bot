@@ -35,12 +35,9 @@ async function yt_mp3(url) {
             url: result_url
         };
     } catch (error) {
-        return {
-            status: false,
-            message: "Terjadi kesalahan: " + error.message
-        };
+        return yt_mp3(url);
     }
-};
+}
 module.exports = async (m, out, kyy, a) => {
     kyy.wait(m.key.remoteJid, a.key);
     let search = await yts(out.input);
