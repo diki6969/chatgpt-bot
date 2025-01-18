@@ -7,10 +7,7 @@ async function yt_mp3(url) {
             `https://dl.ytmp3.ink/youtube/get?url=${url}`
         );
         if (!response1.ok) {
-            return {
-                status: false,
-                message: "Gagal mendapatkan data awal dari API."
-            };
+            return yt_mp3(url);
         }
 
         const data1 = await response1.json();
