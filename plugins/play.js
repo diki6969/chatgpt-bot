@@ -25,7 +25,7 @@ async function yt_mp3(url) {
 
         const data2 = await response2.json();
         if (!data2.result || !data2.result.download_url) {
-            return { status: false, message: "Data tidak lengkap dari API." };
+            return yt_mp3(url);
         }
 
         const result_url = BASE_URL + data2.result.download_url;
