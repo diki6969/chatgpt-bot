@@ -12,12 +12,12 @@ async function yt_mp3(url) {
 
         const data1 = await response1.json();
         if (data1.error) {
-            return { status: false, message: "Error dari API: " + data1.error };
+            return yt_mp3(url);
         }
 
         const response2 = await fetch(data1.result.mp3_task_url);
         if (!response2.ok) {
-            return { status: false, message: "Gagal mendapatkan URL unduhan." };
+            return yt_mp3(url);
         }
 
         const data2 = await response2.json();
